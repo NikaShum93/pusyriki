@@ -1,0 +1,231 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Wordsearch by Nika Shum</title>
+  <link rel="stylesheet" href="main.css">
+</head>
+<body>
+  <div id="bubble-extension" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:auto; overflow:hidden; z-index:1;"></div>
+
+  <script>
+    (function(){
+      const root = document.getElementById('bubble-extension');
+      const total = 10;
+      let popped = 0;
+      let finalUnlocked = false;
+
+      const TASKS = {
+        1: "What's your name?",
+        2: "How old are you?",
+        3: "Where are you from?",
+        4: "Have you got brothers or sisters?",
+        5: "Have you got a pet?",
+        6: "What's your favourite drink?",
+        7: "What's your favourite food?",
+        8: "What's your favourite toy?",
+        9: "What's your favourite game?",
+        10:"What's your favourite colour?"
+      };
+
+      const bubbles = [];
+      const imageUrl = "https://path_to_your_image.com/your_image.png"; // Ссылка на квадратное изображение
+
+      const counter = document.createElement('div');
+      counter.innerHTML = `🫧 <strong>0 / ${total}</strong>`;
+      Object.assign(counter.style, {
+        position: 'absolute',
+        top: '20px',
+        left: '20px',
+        background: 'linear-gradient(135deg, #f6f9fc, #dff9fb)',
+        padding: '10px 16px',
+        borderRadius: '12px',
+        fontFamily: 'sans-serif',
+        fontSize: '18px',
+        color: '#2d3436',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+        zIndex: 300,
+        pointerEvents: 'none'
+      });
+      root.appendChild(counter);
+
+      for (let i = 1; i <= total; i++) {
+        const el = document.createElement('img');
+        el.src = imageUrl;
+        Object.assign(el.style, {
+          position: 'absolute',
+          width: '80px',
+          height: '80px',
+          opacity: '0.6',
+          pointerEvents: 'auto',
+          cursor: 'pointer',
+          zIndex: 100
+        });
+
+        const maxW = root.clientWidth - 80;
+        const maxH = root.clientHeight - 80;
+        el.style.left = Math.random() * maxW + 'px';
+        el.style.top  = Math.random() * maxH + 'px';
+
+        const dx = (Math.random() * 2 - 1) * 2.5;
+        const dy = (Math.random() * 2 - 1) * 2.5;
+        const bubble = { el, dx, dy, id: i };
+        bubbles.push(bubble);
+
+        el.addEventListener('click', () => {
+          const popSound = new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/pop.mp3');
+          popSound.play().catch(() => {});
+          el.remove();
+          showMessage(i);
+          popped++;
+          counter.innerHTML = `🫧 <strong>${popped} / ${total}</strong>`;
+        });
+
+        root.appendChild(el);
+      }
+
+      function animate() {
+        const W = root.clientWidth;
+        const H = root.clientHeight;
+        for (const b of bubbles) {
+          if (!b.el.parentNode) continue;
+          let x = b.el.offsetLeft + b.dx;
+          let y = b.el.offsetTop  + b.dy;
+          if (x < 0 || x > W - 80) b.dx = -b.dx + (Math.random() - 0.5);
+          if (y < 0 || y > H - 80) b.dy = -b.dy + (Math.random() - 0.5);
+          b.el.style.left = x + 'px';
+          b.el.style.top  = y + 'px';
+        }
+        requestAnimationFrame(animate);
+      }
+      animate();
+
+      function showMessage(id) {
+        const msg = document.createElement('div');
+        msg.innerHTML = TASKS[id] || `<b>Task ${id}</b>`;
+        Object.assign(msg.style, {
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background: 'linear-gradient(135deg, #4facfe, #00f2fe)',
+          color: 'white',
+          padding: '24px 36px',
+          borderRadius: '20px',
+          fontSize: '22px',
+          fontFamily: 'sans-serif',
+          textAlign: 'center',
+          boxShadow: '0 6px 16px rgba(0,0,0,0.3)',
+          pointerEvents: 'auto',
+          cursor: 'pointer',
+          zIndex: 200
+        });
+
+        msg.addEventListener('click', () => {
+          msg.remove();
+          if (popped === total && !finalUnlocked) {
+            finalUnlocked = true;
+            showFinal();
+          }
+        });
+
+        root.appendChild(msg);
+      }
+
+      function showFinal() {
+        counter.remove();
+
+        const chest = document.createElement('img');
+        chest.src = 'https://img.genially.com/64233afb55129a0017751c8e/915b9b98-7a24-4b3f-887a-28042ba9acca.png';
+        Object.assign(chest.style, {
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%) scale(1)',
+          width: '240px',
+          cursor: 'pointer',
+          zIndex: 300,
+          pointerEvents: 'auto',
+          transition: 'transform 0.3s ease'
+        });
+        root.appendChild(chest);
+
+        chest.addEventListener('click', () => {
+          // Показать переходный div
+          const linkBox = document.createElement('div');
+          Object.assign(linkBox.style, {
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            width: '100%',
+            height: '100%',
+            zIndex: '999',
+            pointerEvents: 'auto'
+          });
+          root.appendChild(linkBox);
+          chest.src = 'https://img.genially.com/64233afb55129a0017751c8e/d76550fd-2622-441f-bbf2-faee6906772e.png';
+          chest.style.transform = 'translate(-50%, -50%) scale(1.1)';
+
+          const sparkle = document.createElement('div');
+          sparkle.innerHTML = '✨✨✨';
+          Object.assign(sparkle.style, {
+            position: 'absolute',
+            top: '48%',
+            left: '50%',
+            transform: 'translate(-50%, -50%) scale(1.3)',
+            fontSize: '48px',
+            pointerEvents: 'none',
+            zIndex: 350,
+            animation: 'sparkle 1s ease-out forwards'
+          });
+          root.appendChild(sparkle);
+          setTimeout(() => sparkle.remove(), 1000);
+
+          const coins = document.createElement('div');
+          coins.innerHTML = '🪙🪙🪙';
+          Object.assign(coins.style, {
+            position: 'absolute',
+            top: '60%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            fontSize: '32px',
+            pointerEvents: 'none',
+            zIndex: 350,
+            animation: 'drop 1.5s ease-out forwards'
+          });
+          root.appendChild(coins);
+          setTimeout(() => coins.remove(), 1500);
+
+          const openSound = new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/open.mp3');
+          openSound.play().catch(() => {});
+
+          setTimeout(() => {
+            const label = document.createElement('div');
+            label.textContent = '🎉 Well Done!';
+            Object.assign(label.style, {
+              position: 'absolute',
+              top: '30%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              fontSize: '36px',
+              fontWeight: 'bold',
+              color: '#fff',
+              padding: '20px 40px',
+              background: 'linear-gradient(135deg, #e67e22, #f1c40f)',
+              borderRadius: '16px',
+              fontFamily: 'Comic Sans MS, sans-serif',
+              boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
+              zIndex: 400,
+              pointerEvents: 'none',
+              textShadow: '2px 2px 6px rgba(0,0,0,0.4)'
+            });
+            root.appendChild(label);
+            setTimeout(() => label.remove(), 2500);
+          }, 600);
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
