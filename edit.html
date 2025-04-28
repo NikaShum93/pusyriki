@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Редактор для Пузырьков by Nika Shum</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
+
+    .task-editor {
+      margin-bottom: 20px;
+    }
+
+    .task-editor input,
+    .task-editor textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .task-editor button {
+      padding: 10px 20px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .task-editor button:hover {
+      background-color: #45a049;
+    }
+
+    #bubble-preview {
+      position: relative;
+      width: 100%;
+      height: 400px;
+      background-color: #e1e1e1;
+      border-radius: 10px;
+    }
+
+    .code-output {
+      margin-top: 20px;
+      background: #f6f9fc;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h2>Редактор для Пузырьков</h2>
+  <div class="task-editor">
+    <label for="task1">Задание 1:</label>
+    <textarea id="task1" placeholder="Введите текст задания для первого пузырька"></textarea>
+
+    <label for="image1">Изображение для Пузырька 1 (URL):</label>
+    <input id="image1" type="text" placeholder="Вставьте ссылку на изображение">
+
+    <button id="save-button">Сгенерировать код для вставки</button>
+  </div>
+
+  <div id="bubble-preview">
+    <img id="preview-bubble" src="https://media.tenor.com/mqvTrVZEMxIAAAAi/bubble-bfdi.gif" alt="Bubble Preview" style="width: 80px; height: 80px; position: absolute;">
+  </div>
+
+  <div class="code-output" id="iframe-code">
+    <!-- Здесь будет сгенерирован код iframe -->
+  </div>
+
+  <script>
+    const saveButton = document.getElementById('save-button');
+    const task1Input = document.getElementById('task1');
+    const image1Input = document.getElementById('image1');
+    const previewBubble = document.getElementById('preview-bubble');
+    const iframeCodeOutput = document.getElementById('iframe-code');
+
+    // Загрузка данных из localStorage
+    window.onload = () => {
+      const savedTask = localStorage.getItem('task1');
+      const savedImage = localStorage.getItem('image1');
+
+      if (savedTask) {
+        task1Input.value = savedTask;
+      }
+
+      if (savedImage) {
+        image1Input.value = savedImage;
+        previewBubble.src = savedImage;
+      }
+    };
+
+    // Сохранение данных и генерация iframe кода
+    saveButton.addEventListener('click', () => {
+      const task1Value = task1Input.value;
+      const image1Value = image1Input.value;
+
+      localStorage.setItem('task1', task1Value);
+      localStorage.setItem('image1', image1Value);
+
+      // Обновление изображения на превью
+      previewBubble.src = image1Value;
+
+      const iframeCode = `
+<iframe src="https://nikashum93.github.io/pusyriki/?task1=${encodeURIComponent(task1Value)}&image1=${encodeURIComponent(image1Value)}" width="600" height="400" frameborder="0" allowfullscreen></iframe>
+      `;
+      iframeCodeOutput.textContent = iframeCode; // Показать сгенерированный iframe код
+      alert('Код сгенерирован! Копируйте его в Genially.');
+    });
+  </script>
+</body>
+</html>
