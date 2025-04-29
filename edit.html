@@ -5,82 +5,89 @@
   <title>Редактор для Пузырьков by Nika Shum</title>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: 'Arial', sans-serif;
+      background-color: #f5f5f5;
       padding: 20px;
-      background-color: #f9f9f9;
+      margin: 0;
+      box-sizing: border-box;
     }
 
-    .task-editor {
-      margin-bottom: 20px;
+    h2 {
+      text-align: center;
+      color: #4CAF50;
     }
 
-    .task-editor input,
-    .task-editor textarea {
+    .task-inputs {
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .task-inputs h3 {
+      color: #333;
+    }
+
+    .task-inputs label {
+      font-size: 16px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    .task-inputs input,
+    .task-inputs textarea {
       width: 100%;
       padding: 10px;
-      margin: 5px 0;
+      margin: 10px 0;
+      border: 1px solid #ddd;
       border-radius: 5px;
-      border: 1px solid #ccc;
+      font-size: 14px;
     }
 
-    .task-editor button {
-      padding: 10px 20px;
-      background-color: #4caf50;
+    .task-inputs button {
+      padding: 12px 24px;
+      background-color: #4CAF50;
       color: white;
+      font-size: 16px;
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      transition: background-color 0.3s;
     }
 
-    .task-editor button:hover {
+    .task-inputs button:hover {
       background-color: #45a049;
     }
 
     #bubble-preview {
-      position: relative;
       width: 100%;
-      height: 400px;
-      background-color: #e1e1e1;
+      height: 200px;
+      background-color: #f0f0f0;
       border-radius: 10px;
+      margin: 20px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     .code-output {
-      margin-top: 20px;
-      background: #f6f9fc;
-      padding: 10px;
-      border-radius: 5px;
+      background-color: #f8f8f8;
+      padding: 15px;
+      border-radius: 8px;
       font-family: monospace;
       white-space: pre-wrap;
-    }
-
-    .task-inputs {
-      margin-top: 20px;
-    }
-
-    .task-inputs input, .task-inputs textarea {
-      margin-bottom: 10px;
-    }
-
-    .bubble {
-      position: absolute;
-      width: 80px;
-      height: 80px;
-      opacity: 0.6;
-      pointer-events: auto;
-      cursor: pointer;
-      z-index: 100;
+      border: 1px solid #ddd;
     }
   </style>
 </head>
 <body>
+
   <h2>Редактор для Пузырьков</h2>
 
-  <!-- 20 полей для ввода текстов заданий -->
   <div class="task-inputs">
     <h3>Задания для пузырьков (20 шт.)</h3>
-    <div id="task-list">
-      <!-- Здесь будут созданы 20 полей для ввода -->
-    </div>
+    <div id="task-list"></div>
 
     <label for="bubble-image">Изображение для Пузырьков (URL):</label>
     <input id="bubble-image" type="text" placeholder="Вставьте ссылку на изображение для пузырьков">
@@ -92,7 +99,7 @@
   </div>
 
   <div id="bubble-preview">
-    <img id="preview-bubble" src="https://media.tenor.com/mqvTrVZEMxIAAAAi/bubble-bfdi.gif" alt="Bubble Preview" style="width: 80px; height: 80px; position: absolute;">
+    <img id="preview-bubble" src="https://media.tenor.com/mqvTrVZEMxIAAAAi/bubble-bfdi.gif" alt="Bubble Preview" style="width: 80px; height: 80px;">
   </div>
 
   <div class="code-output" id="iframe-code">
@@ -105,7 +112,6 @@
     const previewBubble = document.getElementById('preview-bubble');
     const iframeCodeOutput = document.getElementById('iframe-code');
     const feedbackTextInput = document.getElementById('feedback-text');
-
     const taskList = document.getElementById('task-list');
 
     // Генерация 20 полей для ввода заданий
@@ -142,9 +148,15 @@
     // Сохранение данных и генерация iframe кода
     saveButton.addEventListener('click', () => {
       const tasks = [];
+      let bubbleCount = 0;
+
+      // Собираем данные заданий
       for (let i = 1; i <= 20; i++) {
         const taskValue = document.getElementById(`task${i}`).value;
         tasks.push(taskValue);
+        if (taskValue.trim() !== '') {
+          bubbleCount++;
+        }
         localStorage.setItem(`task${i}`, taskValue); // Сохранение задания в localStorage
       }
 
@@ -156,15 +168,6 @@
 
       // Обновление изображения на превью
       previewBubble.src = bubbleImageValue;
-
-      // Генерация пузырьков в зависимости от количества заполненных заданий
-      const bubbles = [];
-      let bubbleCount = 0;
-      tasks.forEach((task, index) => {
-        if (task.trim() !== '') {
-          bubbleCount++;
-        }
-      });
 
       const iframeCode = `
 <iframe src="https://nikashum93.github.io/pusyriki/?tasks=${encodeURIComponent(JSON.stringify(tasks))}&image=${encodeURIComponent(bubbleImageValue)}&feedback=${encodeURIComponent(feedbackTextValue)}&bubbles=${bubbleCount}" width="600" height="400" frameborder="0" allowfullscreen></iframe>
