@@ -64,9 +64,9 @@
 
     #chest {
       position: absolute;
-      top: 50%;
+      top: -100px; /* Скрыт до выполнения всех заданий */
       left: 50%;
-      transform: translate(-50%, -50%);
+      transform: translateX(-50%);
       width: 240px;
       cursor: pointer;
       z-index: 300;
@@ -200,13 +200,14 @@
         fontSize: '48px',
         pointerEvents: 'none',
         zIndex: 360,
-        animation: 'confetti 1.2s ease-out forwards'
+        animation: 'confetti 1s ease-out forwards'
       });
       bubbleContainer.appendChild(confetti);
 
       setTimeout(() => confetti.remove(), 1200);
 
       // Открытие сундука с анимацией
+      chest.style.top = '50%'; // Появляется по центру, когда все задания выполнены
       chest.addEventListener('click', () => {
         chest.src = 'https://img.genially.com/64233afb55129a0017751c8e/d76550fd-2622-441f-bbf2-faee6906772e.png';
         chest.style.transform = 'translate(-50%, -50%) scale(1.1)';
@@ -236,8 +237,6 @@
         const openSound = new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/open.mp3');
         openSound.play().catch(() => {});
       });
-
-      finalMessage.style.display = 'block'; // Показываем текст фидбека
     }
   </script>
 
