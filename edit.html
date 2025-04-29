@@ -52,16 +52,28 @@
       font-family: monospace;
       white-space: pre-wrap;
     }
+
+    .task-inputs {
+      margin-top: 20px;
+    }
+
+    .task-inputs input, .task-inputs textarea {
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
   <h2>Редактор для Пузырьков</h2>
-  <div class="task-editor">
-    <label for="task1">Задание 1:</label>
-    <textarea id="task1" placeholder="Введите текст задания для первого пузырька"></textarea>
 
-    <label for="image1">Изображение для Пузырька 1 (URL):</label>
-    <input id="image1" type="text" placeholder="Вставьте ссылку на изображение">
+  <!-- 20 полей для ввода текстов заданий -->
+  <div class="task-inputs">
+    <h3>Задания для пузырьков (20 шт.)</h3>
+    <div id="task-list">
+      <!-- Здесь будут созданы 20 полей для ввода -->
+    </div>
+
+    <label for="bubble-image">Изображение для пузырьков (URL):</label>
+    <input id="bubble-image" type="text" placeholder="Вставьте ссылку на изображение для пузырьков">
 
     <button id="save-button">Сгенерировать код для вставки</button>
   </div>
@@ -76,39 +88,55 @@
 
   <script>
     const saveButton = document.getElementById('save-button');
-    const task1Input = document.getElementById('task1');
-    const image1Input = document.getElementById('image1');
+    const bubbleImageInput = document.getElementById('bubble-image');
     const previewBubble = document.getElementById('preview-bubble');
     const iframeCodeOutput = document.getElementById('iframe-code');
 
+    // Генерация 20 полей для ввода заданий
+    const taskList = document.getElementById('task-list');
+    for (let i = 1; i <= 20; i++) {
+      const taskDiv = document.createElement('div');
+      taskDiv.innerHTML = `
+        <label for="task${i}">Задание ${i}:</label>
+        <textarea id="task${i}" placeholder="Введите текст задания для пузырька ${i}"></textarea>
+      `;
+      taskList.appendChild(taskDiv);
+    }
+
     // Загрузка данных из localStorage
     window.onload = () => {
-      const savedTask = localStorage.getItem('task1');
-      const savedImage = localStorage.getItem('image1');
-
-      if (savedTask) {
-        task1Input.value = savedTask;
+      const savedImage = localStorage.getItem('bubbleImage');
+      if (savedImage) {
+        bubbleImageInput.value = savedImage;
+        previewBubble.src = savedImage;
       }
 
-      if (savedImage) {
-        image1Input.value = savedImage;
-        previewBubble.src = savedImage;
+      // Загружаем задания
+      for (let i = 1; i <= 20; i++) {
+        const savedTask = localStorage.getItem(`task${i}`);
+        if (savedTask) {
+          document.getElementById(`task${i}`).value = savedTask;
+        }
       }
     };
 
     // Сохранение данных и генерация iframe кода
     saveButton.addEventListener('click', () => {
-      const task1Value = task1Input.value;
-      const image1Value = image1Input.value;
+      const tasks = [];
+      for (let i = 1; i <= 20; i++) {
+        const taskValue = document.getElementById(`task${i}`).value;
+        tasks.push(taskValue);
+        localStorage.setItem(`task${i}`, taskValue); // Сохранение задания в localStorage
+      }
 
-      localStorage.setItem('task1', task1Value);
-      localStorage.setItem('image1', image1Value);
+      const bubbleImageValue = bubbleImageInput.value;
+      localStorage.setItem('bubbleImage', bubbleImageValue); // Сохранение изображения в localStorage
 
       // Обновление изображения на превью
-      previewBubble.src = image1Value;
+      previewBubble.src = bubbleImageValue;
 
       const iframeCode = `
-<iframe src="https://nikashum93.github.io/pusyriki/?task1=${encodeURIComponent(task1Value)}&image1=${encodeURIComponent(image1Value)}" width="600" height="400" frameborder="0" allowfullscreen></iframe>
+<iframe src="https://nikashum93.github.io/pusyriki/?tasks=${encodeURIComponent(JSON.stringify(tasks))}&image=${encodeURIComponent(bubbleImageValue)}" width="600" height="400" frameborder="0" allowfullscreen></iframe>
       `;
       iframeCodeOutput.textContent = iframeCode; // Показать сгенерированный iframe код
       alert('Код сгенерирован! Копируйте его в Genially.');
