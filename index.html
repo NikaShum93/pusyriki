@@ -64,9 +64,9 @@
 
     #chest {
       position: absolute;
-      top: -100px; /* Скрыт до выполнения всех заданий */
+      top: 50%; /* Центрируем сундук */
       left: 50%;
-      transform: translateX(-50%);
+      transform: translate(-50%, -50%) scale(1); 
       width: 240px;
       cursor: pointer;
       z-index: 300;
@@ -82,13 +82,25 @@
       font-size: 48px;
       pointer-events: none;
       z-index: 360;
-      animation: confetti 1s ease-out forwards;
+      animation: confetti 1.2s ease-out forwards;
     }
 
     @keyframes confetti {
       0% { opacity: 0; transform: translate(-50%, -50%) scale(0.7) rotate(-10deg); }
       50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) rotate(15deg); }
       100% { opacity: 0; transform: translate(-50%, -50%) scale(0.7) rotate(-10deg); }
+    }
+
+    @keyframes sparkle {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.6) rotate(0deg); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.4) rotate(180deg); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(0.6) rotate(360deg); }
+    }
+
+    @keyframes drop {
+      0% { opacity: 0; transform: translate(-50%, -50%) translateY(-30px); }
+      30% { opacity: 1; }
+      100% { opacity: 0; transform: translate(-50%, -50%) translateY(40px); }
     }
   </style>
 </head>
@@ -101,54 +113,74 @@
   <img id="chest" src="https://img.genially.com/64233afb55129a0017751c8e/915b9b98-7a24-4b3f-887a-28042ba9acca.png" alt="Chest">
 
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const tasks = JSON.parse(decodeURIComponent(urlParams.get('tasks') || '[]'));
-    const bubbleImage = decodeURIComponent(urlParams.get('image') || 'https://media.tenor.com/mqvTrVZEMxIAAAAi/bubble-bfdi.gif');
-    const feedbackText = decodeURIComponent(urlParams.get('feedback') || 'Well Done!');
-    const bubbleCount = parseInt(urlParams.get('bubbles') || '0');
+    const total = 10; // количество пузырьков
+    let popped = 0;
+    const TASKS = {
+      1: "What's your name?",
+      2: "How old are you?",
+      3: "Where are you from?",
+      4: "Have you got brothers or sisters?",
+      5: "Have you got a pet?",
+      6: "What's your favourite drink?",
+      7: "What's your favourite food?",
+      8: "What's your favourite toy?",
+      9: "What's your favourite game?",
+      10:"What's your favourite colour?"
+    };
 
-    const bubbleContainer = document.getElementById('bubble-container');
+    const bubbles = [];
+
     const counter = document.getElementById('counter');
     const finalMessage = document.getElementById('final-message');
     const chest = document.getElementById('chest');
-    let popped = 0;
 
     // Двигаем пузырьки медленно
-    const dx = 0.5; // Снижение скорости на оси X
-    const dy = 0.5; // Снижение скорости на оси Y
+    const dx = 0.5;
+    const dy = 0.5;
 
-    // Создание пузырьков
-    for (let i = 0; i < bubbleCount; i++) {
-      const bubble = document.createElement('img');
-      bubble.src = bubbleImage;
-      bubble.classList.add('bubble');
-      bubble.style.left = `${Math.random() * 90}%`;
-      bubble.style.top = `${Math.random() * 90}%`;
+    // Создаем пузырьки
+    for (let i = 1; i <= total; i++) {
+      const el = document.createElement('img');
+      el.src = "https://media.tenor.com/mqvTrVZEMxIAAAAi/bubble-bfdi.gif"; // Пузырик по умолчанию
+      Object.assign(el.style, {
+        position: 'absolute',
+        width: '80px',
+        height: '80px',
+        opacity: '0.6',
+        pointerEvents: 'auto',
+        cursor: 'pointer',
+        zIndex: 100
+      });
+
+      const maxW = window.innerWidth - 80;
+      const maxH = window.innerHeight - 80;
+      el.style.left = Math.random() * maxW + 'px';
+      el.style.top  = Math.random() * maxH + 'px';
 
       let xSpeed = (Math.random() - 0.5) * dx;
       let ySpeed = (Math.random() - 0.5) * dy;
 
-      bubble.addEventListener('click', () => {
+      el.addEventListener('click', () => {
         const popSound = new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/pop.mp3');
         popSound.play().catch(() => {});
-        bubble.remove();
-        showMessage(i + 1); // Показываем сообщение по клику
+        el.remove();
+        showMessage(i);
         popped++;
-        counter.innerHTML = `🫧 <strong>${popped} / ${bubbleCount}</strong>`;
+        counter.innerHTML = `🫧 <strong>${popped} / ${total}</strong>`;
       });
 
-      bubbleContainer.appendChild(bubble);
+      bubbleContainer.appendChild(el);
 
-      // Движение пузырьков
+      // Двигаем пузырьки
       function moveBubble() {
-        let x = bubble.offsetLeft + xSpeed;
-        let y = bubble.offsetTop + ySpeed;
+        let x = el.offsetLeft + xSpeed;
+        let y = el.offsetTop + ySpeed;
 
         if (x < 0 || x > window.innerWidth - 80) xSpeed = -xSpeed + (Math.random() - 0.5) * dx;
         if (y < 0 || y > window.innerHeight - 80) ySpeed = -ySpeed + (Math.random() - 0.5) * dy;
 
-        bubble.style.left = `${x}px`;
-        bubble.style.top = `${y}px`;
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
 
         requestAnimationFrame(moveBubble);
       }
@@ -158,7 +190,7 @@
     // Функция для отображения задания
     function showMessage(id) {
       const msg = document.createElement('div');
-      msg.innerHTML = tasks[id - 1] || `<b>Задание ${id}</b>`;
+      msg.innerHTML = TASKS[id] || `<b>Задание ${id}</b>`;
       Object.assign(msg.style, {
         position: 'absolute',
         top: '50%',
@@ -179,7 +211,7 @@
 
       msg.addEventListener('click', () => {
         msg.remove();
-        if (popped === bubbleCount) {
+        if (popped === total) {
           showFinal();
         }
       });
@@ -189,54 +221,46 @@
 
     // Функция для отображения финального фидбека
     function showFinal() {
-      // Показываем анимацию с фейерверками
-      const confetti = document.createElement('div');
-      confetti.innerHTML = '🎊🎊🎊';
-      Object.assign(confetti.style, {
+      const openSound = new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/open.mp3');
+      openSound.play().catch(() => {});
+
+      finalMessage.style.display = 'block'; // Показать финальное сообщение
+
+      setTimeout(() => {
+        chest.style.transform = 'translate(-50%, -50%) scale(1.1)';
+        chest.src = 'https://img.genially.com/64233afb55129a0017751c8e/d76550fd-2622-441f-bbf2-faee6906772e.png'; // Сундук открывается
+      }, 600);
+
+      // Добавляем анимацию с блестками и конфетти
+      const sparkle = document.createElement('div');
+      sparkle.innerHTML = '✨✨✨';
+      Object.assign(sparkle.style, {
         position: 'absolute',
         top: '50%',
         left: '50%',
-        transform: 'translate(-50%, -50%)',
+        transform: 'translate(-50%, -50%) scale(1.3)',
         fontSize: '48px',
         pointerEvents: 'none',
-        zIndex: 360,
-        animation: 'confetti 1s ease-out forwards'
+        zIndex: 350,
+        animation: 'sparkle 1s ease-out forwards'
       });
-      bubbleContainer.appendChild(confetti);
+      bubbleContainer.appendChild(sparkle);
+      setTimeout(() => sparkle.remove(), 1000);
 
-      setTimeout(() => confetti.remove(), 1200);
-
-      // Открытие сундука с анимацией
-      chest.style.top = '50%'; // Появляется по центру, когда все задания выполнены
-      chest.addEventListener('click', () => {
-        chest.src = 'https://img.genially.com/64233afb55129a0017751c8e/d76550fd-2622-441f-bbf2-faee6906772e.png';
-        chest.style.transform = 'translate(-50%, -50%) scale(1.1)';
-        const label = document.createElement('div');
-        label.textContent = feedbackText;
-        Object.assign(label.style, {
-          position: 'absolute',
-          top: '30%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          fontSize: '36px',
-          fontWeight: 'bold',
-          color: '#fff',
-          padding: '20px 40px',
-          background: 'linear-gradient(135deg, #e67e22, #f1c40f)',
-          borderRadius: '16px',
-          fontFamily: 'Comic Sans MS, sans-serif',
-          boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
-          zIndex: 400,
-          pointerEvents: 'none',
-          textShadow: '2px 2px 6px rgba(0,0,0,0.4)'
-        });
-        bubbleContainer.appendChild(label);
-        setTimeout(() => label.remove(), 2500);
-
-        // Звук открытия сундука
-        const openSound = new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/open.mp3');
-        openSound.play().catch(() => {});
+      const coins = document.createElement('div');
+      coins.innerHTML = '🪙🪙🪙';
+      Object.assign(coins.style, {
+        position: 'absolute',
+        top: '60%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        fontSize: '32px',
+        pointerEvents: 'none',
+        zIndex: 350,
+        animation: 'drop 1.5s ease-out forwards'
       });
+      bubbleContainer.appendChild(coins);
+      setTimeout(() => coins.remove(), 1500);
     }
   </script>
 
