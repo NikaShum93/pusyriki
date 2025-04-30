@@ -4,56 +4,118 @@
   <meta charset="UTF-8">
   <title>Пузырьки by Nika Shum</title>
   <style>
-    html, body {margin:0;padding:0;overflow:hidden;width:100%;height:100%;background:transparent;}
-    .bubble-container {position:relative;width:1280px;height:720px;overflow:hidden;}
-    .bubble {position:absolute;width:80px;height:80px;opacity:0.8;cursor:pointer;border-radius:50%;background-image:url('https://media.tenor.com/mqvTrVZEMxIAAAAi/bubble-bfdi.gif');background-size:cover;}
-    #counter {position:absolute;top:20px;left:20px;font-family:sans-serif;font-size:18px;color:#2d3436;z-index:10;}
-    #chest {position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:240px;cursor:pointer;display:none;z-index:100;}
-    #final-message {position:absolute;top:calc(50% - 170px);left:50%;transform:translateX(-50%);font-size:32px;color:white;background:linear-gradient(135deg,#f39c12,#f1c40f);padding:15px 25px;border-radius:16px;font-family:Comic Sans MS,sans-serif;display:none;z-index:101;text-align:center;}
+    html, body {margin:0;padding:0;overflow:hidden;width:1280px;height:720px;background:transparent;}
+    #bubble-container {position:relative;width:1280px;height:720px;overflow:hidden;}
+    .bubble {
+      position:absolute;width:80px;height:80px;opacity:0.8;cursor:pointer;border-radius:50%;
+      background-image:url('https://media.tenor.com/mqvTrVZEMxIAAAAi/bubble-bfdi.gif');
+      background-size:cover;
+    }
+    #counter {
+      position:absolute;top:20px;left:20px;font-family:sans-serif;font-size:18px;color:#2d3436;z-index:10;
+      background:rgba(255,255,255,0.7);border-radius:12px;padding:5px 10px;
+    }
+    #chest {
+      position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:240px;cursor:pointer;
+      display:none;z-index:100;
+    }
+    #final-message {
+      position:absolute;top:calc(50% - 170px);left:50%;transform:translate(-50%, -50%);
+      font-size:32px;color:white;background:linear-gradient(135deg,#f39c12,#f1c40f);
+      padding:15px 25px;border-radius:16px;font-family:sans-serif;display:none;z-index:101;text-align:center;
+    }
+    .task-message {
+      position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+      background:linear-gradient(135deg,#4facfe,#00f2fe);color:white;padding:20px 30px;
+      border-radius:20px;font-size:20px;font-family:sans-serif;text-align:center;
+      box-shadow:0 6px 16px rgba(0,0,0,0.3);cursor:pointer;z-index:200;
+    }
   </style>
 </head>
 <body>
-<div class="bubble-container" id="bubble-container">
+<div id="bubble-container">
   <div id="counter">🫧 <strong>0 / 10</strong></div>
   <div id="final-message">🎉 Well Done! 🎉</div>
   <img id="chest" src="https://img.genially.com/64233afb55129a0017751c8e/915b9b98-7a24-4b3f-887a-28042ba9acca.png">
 </div>
 
 <script>
-  const total=10; let popped=0;
+  const total=10;
+  let popped=0;
   const bubbleContainer=document.getElementById('bubble-container');
   const counter=document.getElementById('counter');
   const finalMessage=document.getElementById('final-message');
   const chest=document.getElementById('chest');
-  const TASKS=["What's your name?","How old are you?","Where are you from?","Have you got brothers or sisters?","Have you got a pet?","What's your favourite drink?","What's your favourite food?","What's your favourite toy?","What's your favourite game?","What's your favourite colour?"];
+  const TASKS=["What's your name?","How old are you?","Where are you from?","Have you got brothers or sisters?",
+               "Have you got a pet?","What's your favourite drink?","What's your favourite food?",
+               "What's your favourite toy?","What's your favourite game?","What's your favourite colour?"];
+
+  function randomPos(max){return Math.random()*(max-100)+10;}
 
   for(let i=0;i<total;i++){
     const bubble=document.createElement('div');bubble.classList.add('bubble');
-    bubble.style.left=Math.random()*1200+'px';bubble.style.top=Math.random()*640+'px';
-    bubble.onclick=()=>{new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/pop.mp3').play();bubble.remove();popped++;counter.innerHTML=`🫧 <strong>${popped}/${total}</strong>`;showTask(i);if(popped===total)showFinal();};
+    bubble.style.left=randomPos(1200)+'px';bubble.style.top=randomPos(640)+'px';
+
+    bubble.onclick=()=>{
+      new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/pop.mp3').play();
+      bubble.remove();popped++;
+      counter.innerHTML=`🫧 <strong>${popped} / ${total}</strong>`;
+      showTask(i);
+      if(popped===total){showFinal();}
+    };
     bubbleContainer.appendChild(bubble);
   }
 
   function showTask(i){
-    const msg=document.createElement('div');msg.innerHTML=TASKS[i];Object.assign(msg.style,{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',background:'linear-gradient(135deg,#4facfe,#00f2fe)',color:'white',padding:'20px 30px',borderRadius:'20px',fontSize:'20px',fontFamily:'sans-serif',textAlign:'center',boxShadow:'0 6px 16px rgba(0,0,0,0.3)',cursor:'pointer',zIndex:200});
-    msg.onclick=()=>msg.remove();bubbleContainer.appendChild(msg);
+    const msg=document.createElement('div');msg.classList.add('task-message');
+    msg.innerHTML=TASKS[i];
+    msg.onclick=()=>msg.remove();
+    bubbleContainer.appendChild(msg);
   }
 
   function showFinal(){
-    finalMessage.style.display='block';chest.style.display='block';
-    chest.onclick=()=>{chest.src='https://img.genially.com/64233afb55129a0017751c8e/d76550fd-2622-441f-bbf2-faee6906772e.png';new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/open.mp3').play();};
+    finalMessage.style.display='block';
+    chest.style.display='block';
+    chest.onclick=()=>{
+      chest.src='https://img.genially.com/64233afb55129a0017751c8e/d76550fd-2622-441f-bbf2-faee6906772e.png';
+      new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/open.mp3').play();
+      animateConfetti();
+    };
   }
 
   function animateBubbles(){
     document.querySelectorAll('.bubble').forEach(bubble=>{
       let dx=(Math.random()-0.5)*0.5,dy=(Math.random()-0.5)*0.5;
       function move(){
-        let rect=bubble.getBoundingClientRect(),x=rect.left+dx,y=rect.top+dy;
-        if(x<0||x>1200)dx=-dx;if(y<0||y>640)dy=-dy;
-        bubble.style.left=x+'px';bubble.style.top=y+'px';requestAnimationFrame(move);
+        let rect=bubble.getBoundingClientRect(),
+            x=rect.left+dx-bubbleContainer.getBoundingClientRect().left,
+            y=rect.top+dy-bubbleContainer.getBoundingClientRect().top;
+        if(x<=0||x>=1200)dx=-dx;if(y<=0||y>=640)dy=-dy;
+        bubble.style.left=x+'px';bubble.style.top=y+'px';
+        requestAnimationFrame(move);
       }move();
     });
-  }animateBubbles();
+  }
+
+  function animateConfetti(){
+    const sparkle=document.createElement('div');sparkle.innerHTML='✨✨✨';
+    Object.assign(sparkle.style,{
+      position:'absolute',top:'45%',left:'50%',transform:'translate(-50%, -50%) scale(1.3)',
+      fontSize:'48px',pointerEvents:'none',zIndex:350,animation:'sparkle 1s ease-out forwards'
+    });
+    bubbleContainer.appendChild(sparkle);
+    setTimeout(()=>sparkle.remove(),1000);
+  }
+
+  const style=document.createElement('style');style.innerHTML=`
+    @keyframes sparkle {
+      0% {opacity: 0; transform: scale(0.5);}
+      50% {opacity: 1; transform: scale(1.5);}
+      100% {opacity: 0; transform: scale(0.5);}
+    }`;
+  document.head.appendChild(style);
+
+  animateBubbles();
 </script>
 </body>
 </html>
