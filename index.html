@@ -164,4 +164,57 @@
         animation: 'sparkle 1s ease-out forwards'
       });
       bubbleContainer.appendChild(sparkle);
-      set
+      setTimeout(() => sparkle.remove(), 1000);
+
+      const confetti = document.createElement('div');
+      confetti.innerHTML = '🎊🎊🎊';
+      Object.assign(confetti.style, {
+        position: 'absolute',
+        top: '40%',
+        left: '50%',
+        transform: 'translate(-50%, -50%) scale(1)',
+        fontSize: '48px',
+        pointerEvents: 'none',
+        zIndex: 360,
+        animation: 'sparkle 1.2s ease-out forwards'
+      });
+      bubbleContainer.appendChild(confetti);
+      setTimeout(() => confetti.remove(), 1200);
+    };
+  }
+
+  const style = document.createElement('style');
+  style.innerHTML = `
+    @keyframes sparkle {
+      0% {opacity: 0; transform: scale(0.5);}
+      50% {opacity: 1; transform: scale(1.5);}
+      100% {opacity: 0; transform: scale(0.5);}
+    }
+  `;
+  document.head.appendChild(style);
+
+  function animateBubbles() {
+    const bubbles = document.querySelectorAll('.bubble');
+    bubbles.forEach(bubble => {
+      let dx = (Math.random() - 0.5) * 0.5;
+      let dy = (Math.random() - 0.5) * 0.5;
+
+      function move() {
+        const rect = bubble.getBoundingClientRect();
+        let x = rect.left + dx;
+        let y = rect.top + dy;
+        if (x < 0 || x > 1200) dx = -dx;
+        if (y < 0 || y > 640) dy = -dy;
+        bubble.style.left = x + 'px';
+        bubble.style.top = y + 'px';
+        requestAnimationFrame(move);
+      }
+      move();
+    });
+  }
+
+  animateBubbles();
+</script>
+
+</body>
+</html>
