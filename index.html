@@ -15,9 +15,8 @@
 
     .bubble-container {
       position: relative;
-      width: 1280px; /* явная ширина для Genially */
-      height: 720px; /* явная высота для Genially */
-      background-color: transparent;
+      width: 1280px;
+      height: 720px;
       overflow: hidden;
     }
 
@@ -26,7 +25,6 @@
       width: 80px;
       height: 80px;
       opacity: 0.8;
-      pointer-events: auto;
       cursor: pointer;
       border-radius: 50%;
       background-image: url('https://media.tenor.com/mqvTrVZEMxIAAAAi/bubble-bfdi.gif');
@@ -50,22 +48,25 @@
       transform: translate(-50%, -50%);
       width: 240px;
       cursor: pointer;
-      z-index: 100;
       display: none;
+      z-index: 100;
     }
 
     #final-message {
       position: absolute;
-      top: 30%;
+      top: calc(50% - 170px); /* чуть выше и ровнее над сундуком */
       left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 36px;
+      transform: translateX(-50%);
+      font-size: 32px;
       color: white;
-      background: #4CAF50;
-      padding: 20px 40px;
+      background: linear-gradient(135deg, #f39c12, #f1c40f);
+      padding: 15px 25px;
       border-radius: 16px;
+      font-family: Comic Sans MS, sans-serif;
       display: none;
       z-index: 101;
+      text-align: center;
+      white-space: nowrap;
     }
   </style>
 </head>
@@ -85,20 +86,60 @@
   const finalMessage = document.getElementById('final-message');
   const chest = document.getElementById('chest');
 
+  const TASKS = [
+    "What's your name?",
+    "How old are you?",
+    "Where are you from?",
+    "Have you got brothers or sisters?",
+    "Have you got a pet?",
+    "What's your favourite drink?",
+    "What's your favourite food?",
+    "What's your favourite toy?",
+    "What's your favourite game?",
+    "What's your favourite colour?"
+  ];
+
   for (let i = 0; i < total; i++) {
     const bubble = document.createElement('div');
     bubble.classList.add('bubble');
-    bubble.style.left = Math.random() * (1280 - 80) + 'px';
-    bubble.style.top = Math.random() * (720 - 80) + 'px';
+    bubble.style.left = Math.random() * (1200) + 'px';
+    bubble.style.top = Math.random() * (640) + 'px';
 
     bubble.addEventListener('click', () => {
+      const popSound = new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/pop.mp3');
+      popSound.play();
       bubble.remove();
       popped++;
       counter.innerHTML = `🫧 <strong>${popped} / ${total}</strong>`;
+      showTask(i);
       if (popped === total) showFinal();
     });
 
     bubbleContainer.appendChild(bubble);
+  }
+
+  function showTask(i) {
+    const msg = document.createElement('div');
+    msg.innerHTML = TASKS[i];
+    Object.assign(msg.style, {
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      background: 'linear-gradient(135deg, #4facfe, #00f2fe)',
+      color: 'white',
+      padding: '20px 30px',
+      borderRadius: '20px',
+      fontSize: '20px',
+      fontFamily: 'sans-serif',
+      textAlign: 'center',
+      boxShadow: '0 6px 16px rgba(0,0,0,0.3)',
+      cursor: 'pointer',
+      zIndex: 200
+    });
+
+    msg.onclick = () => msg.remove();
+    bubbleContainer.appendChild(msg);
   }
 
   function showFinal() {
@@ -108,34 +149,19 @@
       chest.src = 'https://img.genially.com/64233afb55129a0017751c8e/d76550fd-2622-441f-bbf2-faee6906772e.png';
       const openSound = new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/open.mp3');
       openSound.play();
-    };
-  }
 
-  function animateBubbles() {
-    const bubbles = document.querySelectorAll('.bubble');
-    bubbles.forEach(bubble => {
-      let dx = (Math.random() - 0.5) * 0.5;
-      let dy = (Math.random() - 0.5) * 0.5;
-
-      function move() {
-        const rect = bubble.getBoundingClientRect();
-        let x = rect.left + dx;
-        let y = rect.top + dy;
-
-        if (x < 0 || x > 1200) dx = -dx;
-        if (y < 0 || y > 640) dy = -dy;
-
-        bubble.style.left = x + 'px';
-        bubble.style.top = y + 'px';
-
-        requestAnimationFrame(move);
-      }
-      move();
-    });
-  }
-
-  animateBubbles();
-</script>
-
-</body>
-</html>
+      // Анимация конфетти и блесток
+      const sparkle = document.createElement('div');
+      sparkle.innerHTML = '✨✨✨';
+      Object.assign(sparkle.style, {
+        position: 'absolute',
+        top: '45%',
+        left: '50%',
+        transform: 'translate(-50%, -50%) scale(1.3)',
+        fontSize: '48px',
+        pointerEvents: 'none',
+        zIndex: 350,
+        animation: 'sparkle 1s ease-out forwards'
+      });
+      bubbleContainer.appendChild(sparkle);
+      set
