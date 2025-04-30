@@ -1,165 +1,221 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Пузырьки by Nika Shum</title>
+  <meta charset="UTF-8" />
+  <title>Bubbles by Nika Shum</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     html, body {
-      margin: 0; padding: 0;
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      overflow: hidden;
+    }
+    #bubble-extension {
+      position: absolute;
+      top: 0; left: 0;
       width: 100%; height: 100%;
-      background: transparent; overflow: hidden;
-    }
-    #bubble-container {
-      position: absolute; inset: 0; overflow: hidden;
-    }
-    .bubble {
-      position: absolute;
-      width: 80px; height: 80px;
-      background-image: url('https://media.tenor.com/mqvTrVZEMxIAAAAi/bubble-bfdi.gif');
-      background-size: cover;
-      opacity: 0.8; cursor: pointer; border-radius: 50%;
-    }
-    .spark {
-      position: absolute;
-      font-size: 16px;
-      animation: explode 0.8s ease-out forwards;
-      pointer-events: none;
-      z-index: 200;
-      color: hsl(var(--hue), 100%, 70%);
-    }
-    @keyframes explode {
-      0% { opacity: 1; transform: scale(0.8) rotate(0deg); }
-      100% { opacity: 0; transform: scale(2.5) rotate(720deg); }
-    }
-    #counter {
-      position: absolute; top: 20px; left: 20px;
-      font-family: sans-serif; font-size: 18px;
-      color: #2d3436; background: rgba(255,255,255,0.7);
-      padding: 5px 10px; border-radius: 12px;
-      z-index: 10;
-    }
-    #chest {
-      position: absolute; width: 240px;
-      top: 50%; left: 50%; transform: translate(-50%, -50%);
-      cursor: pointer; display: none; z-index: 100;
-    }
-    #final-message {
-      position: absolute; display: none;
-      top: calc(50% - 190px); left: 50.3%; transform: translate(-50%, -50%);
-      font-size: 32px; color: white;
-      background: linear-gradient(135deg, #f39c12, #f1c40f);
-      padding: 15px 25px; border-radius: 16px;
-      font-family: Comic Sans MS, sans-serif;
-      z-index: 101; white-space: nowrap;
-    }
-    .task-message {
-      position: absolute;
-      top: 50%; left: 50%; transform: translate(-50%, -50%);
-      background: linear-gradient(135deg, #4facfe, #00f2fe);
-      color: white; padding: 20px 30px;
-      border-radius: 20px; font-size: 20px;
-      font-family: sans-serif; text-align: center;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
-      cursor: pointer; z-index: 200;
+      pointer-events: auto;
+      overflow: hidden;
+      z-index: 1;
     }
   </style>
 </head>
 <body>
-  <div id="bubble-container">
-    <div id="counter">🫧 <strong>0 / 10</strong></div>
-    <div id="final-message">🎉 Well Done! 🎉</div>
-    <img id="chest" src="https://img.genially.com/64233afb55129a0017751c8e/915b9b98-7a24-4b3f-887a-28042ba9acca.png">
-  </div>
+  <div id="bubble-extension"></div>
   <script>
-    const total = 10;
-    let popped = 0;
-    const bubbleContainer = document.getElementById('bubble-container');
-    const counter = document.getElementById('counter');
-    const finalMessage = document.getElementById('final-message');
-    const chest = document.getElementById('chest');
-    const TASKS = [
-      "What's your name?", "How old are you?", "Where are you from?",
-      "Have you got brothers or sisters?", "Have you got a pet?",
-      "What's your favourite drink?", "What's your favourite food?",
-      "What's your favourite toy?", "What's your favourite game?",
-      "What's your favourite colour?"
-    ];
+    (function(){
+      const root = document.getElementById('bubble-extension');
+      const urlParams = new URLSearchParams(window.location.search);
+      const tasks = {};
+      let popped = 0;
+      let finalUnlocked = false;
+      const total = Array.from({length: 20}, (_, i) => {
+        const key = `task${i+1}`;
+        const val = urlParams.get(key);
+        if (val) tasks[i+1] = val;
+        return val ? i+1 : null;
+      }).filter(Boolean).length;
 
-    function createSpark(x, y) {
-      for (let i = 0; i < 8; i++) {
-        const spark = document.createElement('div');
-        spark.className = 'spark';
-        spark.innerHTML = '✦';
-        spark.style.left = x + (Math.random() * 30 - 15) + 'px';
-        spark.style.top = y + (Math.random() * 30 - 15) + 'px';
-        spark.style.setProperty('--hue', Math.floor(Math.random() * 360));
-        bubbleContainer.appendChild(spark);
-        setTimeout(() => spark.remove(), 800);
-      }
-    }
+      const imgUrl = urlParams.get('img') || "https://media.tenor.com/mqvTrVZEMxIAAAAi/bubble-bfdi.gif";
+      const finalText = urlParams.get('final') || '🎉 Well Done!';
 
-    const bubbles = [];
-    for (let i = 0; i < total; i++) {
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble';
-      bubble.style.left = Math.random() * (window.innerWidth - 100) + 'px';
-      bubble.style.top = Math.random() * (window.innerHeight - 100) + 'px';
-      bubble.dx = (Math.random() - 0.5) * 0.6;
-      bubble.dy = (Math.random() - 0.5) * 0.6;
-      bubble.onclick = (e) => {
-        new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/pop.mp3').play();
-        const rect = e.target.getBoundingClientRect();
-        createSpark(rect.left, rect.top);
-        bubble.remove();
-        popped++;
-        counter.innerHTML = `🫧 <strong>${popped} / ${total}</strong>`;
-        showTask(i);
-        if (popped === total) showChest();
-      };
-      bubbles.push(bubble);
-      bubbleContainer.appendChild(bubble);
-    }
+      const bubbles = [];
 
-    function animateBubbles() {
-      bubbles.forEach(b => {
-        if (!b.parentNode) return;
-        let x = parseFloat(b.style.left);
-        let y = parseFloat(b.style.top);
-        x += b.dx;
-        y += b.dy;
-        if (x <= 0 || x >= window.innerWidth - 80) b.dx = -b.dx;
-        if (y <= 0 || y >= window.innerHeight - 80) b.dy = -b.dy;
-        b.style.left = x + 'px';
-        b.style.top = y + 'px';
+      const counter = document.createElement('div');
+      counter.innerHTML = `🫧 <strong>0 / ${total}</strong>`;
+      Object.assign(counter.style, {
+        position: 'absolute',
+        top: '20px',
+        left: '20px',
+        background: 'linear-gradient(135deg, #f6f9fc, #dff9fb)',
+        padding: '10px 16px',
+        borderRadius: '12px',
+        fontFamily: 'sans-serif',
+        fontSize: '18px',
+        color: '#2d3436',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+        zIndex: 300,
+        pointerEvents: 'none'
       });
-      requestAnimationFrame(animateBubbles);
-    }
-    animateBubbles();
+      root.appendChild(counter);
 
-    function showTask(i) {
-      const msg = document.createElement('div');
-      msg.className = 'task-message';
-      msg.innerHTML = TASKS[i];
-      msg.onclick = () => msg.remove();
-      bubbleContainer.appendChild(msg);
-    }
+      for (let i = 1; i <= total; i++) {
+        const el = document.createElement('img');
+        el.src = imgUrl;
+        Object.assign(el.style, {
+          position: 'absolute',
+          width: '80px',
+          height: '80px',
+          opacity: '0.6',
+          pointerEvents: 'auto',
+          cursor: 'pointer',
+          zIndex: 100
+        });
 
-    function showChest() {
-      chest.style.display = 'block';
-      chest.onclick = () => {
-        chest.src = 'https://img.genially.com/64233afb55129a0017751c8e/d76550fd-2622-441f-bbf2-faee6906772e.png';
-        new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/open.mp3').play();
-        triggerFirework();
-        finalMessage.style.display = 'block';
+        const maxW = root.clientWidth - 80;
+        const maxH = root.clientHeight - 80;
+        el.style.left = Math.random() * maxW + 'px';
+        el.style.top  = Math.random() * maxH + 'px';
+
+        const dx = (Math.random()*2 - 1) * 1.5;
+        const dy = (Math.random()*2 - 1) * 1.5;
+        const bubble = { el, dx, dy, id: i };
+        bubbles.push(bubble);
+
+        el.addEventListener('click', () => {
+          const popSound = new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/pop.mp3');
+          popSound.play().catch(() => {});
+          el.remove();
+          showMessage(i);
+          popped++;
+          counter.innerHTML = `🫧 <strong>${popped} / ${total}</strong>`;
+        });
+
+        root.appendChild(el);
       }
-    }
 
-    function triggerFirework() {
-      for (let i = 0; i < 20; i++) {
-        setTimeout(() => createSpark(window.innerWidth / 2 + (Math.random()*100 - 50),
-                                     window.innerHeight / 2 + (Math.random()*100 - 50)), i * 50);
+      function animate() {
+        const W = root.clientWidth;
+        const H = root.clientHeight;
+        for (const b of bubbles) {
+          if (!b.el.parentNode) continue;
+          let x = b.el.offsetLeft + b.dx;
+          let y = b.el.offsetTop  + b.dy;
+          if (x < 0 || x > W - 80) b.dx = -b.dx + (Math.random() - 0.5);
+          if (y < 0 || y > H - 80) b.dy = -b.dy + (Math.random() - 0.5);
+          b.el.style.left = x + 'px';
+          b.el.style.top  = y + 'px';
+        }
+        requestAnimationFrame(animate);
       }
-    }
+      animate();
+
+      function showMessage(id) {
+        const msg = document.createElement('div');
+        msg.innerHTML = tasks[id] || `<b>Task ${id}</b>`;
+        Object.assign(msg.style, {
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background: 'linear-gradient(135deg, #4facfe, #00f2fe)',
+          color: 'white',
+          padding: '24px 36px',
+          borderRadius: '20px',
+          fontSize: '22px',
+          fontFamily: 'sans-serif',
+          textAlign: 'center',
+          boxShadow: '0 6px 16px rgba(0,0,0,0.3)',
+          pointerEvents: 'auto',
+          cursor: 'pointer',
+          zIndex: 200
+        });
+
+        msg.addEventListener('click', () => {
+          msg.remove();
+          if (popped === total && !finalUnlocked) {
+            finalUnlocked = true;
+            showFinal();
+          }
+        });
+
+        root.appendChild(msg);
+      }
+
+      function showFinal() {
+        counter.remove();
+
+        const chest = document.createElement('img');
+        chest.src = 'https://img.genially.com/64233afb55129a0017751c8e/915b9b98-7a24-4b3f-887a-28042ba9acca.png';
+        Object.assign(chest.style, {
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%) scale(1)',
+          width: '240px',
+          cursor: 'pointer',
+          zIndex: 300,
+          pointerEvents: 'auto',
+          transition: 'transform 0.3s ease'
+        });
+        root.appendChild(chest);
+
+        chest.addEventListener('click', () => {
+          chest.src = 'https://img.genially.com/64233afb55129a0017751c8e/d76550fd-2622-441f-bbf2-faee6906772e.png';
+          chest.style.transform = 'translate(-50%, -50%) scale(1.1)';
+
+          const openSound = new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/open.mp3');
+          openSound.play().catch(() => {});
+
+          const feedback = document.createElement('div');
+          feedback.textContent = finalText;
+          Object.assign(feedback.style, {
+            position: 'absolute',
+            top: '35%',
+            left: '49.4%',
+            transform: 'translate(-50%, -50%)',
+            fontSize: '28px',
+            fontWeight: 'bold',
+            color: '#fff',
+            padding: '14px 28px',
+            background: 'linear-gradient(135deg, #e67e22, #f1c40f)',
+            borderRadius: '16px',
+            fontFamily: 'Comic Sans MS, sans-serif',
+            boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
+            zIndex: 400,
+            pointerEvents: 'none',
+            textShadow: '2px 2px 6px rgba(0,0,0,0.4)'
+          });
+          root.appendChild(feedback);
+
+          const sparkle = document.createElement('div');
+          sparkle.innerHTML = '✨✨✨';
+          Object.assign(sparkle.style, {
+            position: 'absolute',
+            top: '48%',
+            left: '50%',
+            transform: 'translate(-50%, -50%) scale(1.3)',
+            fontSize: '32px',
+            pointerEvents: 'none',
+            zIndex: 350,
+            animation: 'sparkle 1.2s ease-out forwards'
+          });
+          root.appendChild(sparkle);
+          setTimeout(() => sparkle.remove(), 1200);
+        });
+      }
+
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes sparkle {
+          0% { opacity: 0; transform: translate(-50%, -50%) scale(0.6) rotate(0deg); }
+          50% { opacity: 1; transform: translate(-50%, -50%) scale(1.4) rotate(180deg); }
+          100% { opacity: 0; transform: translate(-50%, -50%) scale(0.6) rotate(360deg); }
+        }
+      `;
+      document.head.appendChild(style);
+    })();
   </script>
 </body>
 </html>
