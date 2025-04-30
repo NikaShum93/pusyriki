@@ -21,14 +21,15 @@
     }
     .spark {
       position: absolute;
-      font-size: 28px;
-      animation: explode 0.6s ease-out forwards;
+      font-size: 16px;
+      animation: explode 0.8s ease-out forwards;
       pointer-events: none;
       z-index: 200;
+      color: hsl(var(--hue), 100%, 70%);
     }
     @keyframes explode {
-      0% { opacity: 1; transform: scale(1) rotate(0deg); }
-      100% { opacity: 0; transform: scale(2.5) rotate(360deg); }
+      0% { opacity: 1; transform: scale(0.8) rotate(0deg); }
+      100% { opacity: 0; transform: scale(2.5) rotate(720deg); }
     }
     #counter {
       position: absolute; top: 20px; left: 20px;
@@ -85,20 +86,26 @@
     ];
 
     function createSpark(x, y) {
-      const spark = document.createElement('div');
-      spark.className = 'spark';
-      spark.innerHTML = '✨';
-      spark.style.left = x + 'px';
-      spark.style.top = y + 'px';
-      bubbleContainer.appendChild(spark);
-      setTimeout(() => spark.remove(), 600);
+      for (let i = 0; i < 8; i++) {
+        const spark = document.createElement('div');
+        spark.className = 'spark';
+        spark.innerHTML = '✦';
+        spark.style.left = x + (Math.random() * 30 - 15) + 'px';
+        spark.style.top = y + (Math.random() * 30 - 15) + 'px';
+        spark.style.setProperty('--hue', Math.floor(Math.random() * 360));
+        bubbleContainer.appendChild(spark);
+        setTimeout(() => spark.remove(), 800);
+      }
     }
 
+    const bubbles = [];
     for (let i = 0; i < total; i++) {
       const bubble = document.createElement('div');
       bubble.className = 'bubble';
       bubble.style.left = Math.random() * (window.innerWidth - 100) + 'px';
       bubble.style.top = Math.random() * (window.innerHeight - 100) + 'px';
+      bubble.dx = (Math.random() - 0.5) * 0.6;
+      bubble.dy = (Math.random() - 0.5) * 0.6;
       bubble.onclick = (e) => {
         new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/pop.mp3').play();
         const rect = e.target.getBoundingClientRect();
@@ -109,8 +116,25 @@
         showTask(i);
         if (popped === total) showChest();
       };
+      bubbles.push(bubble);
       bubbleContainer.appendChild(bubble);
     }
+
+    function animateBubbles() {
+      bubbles.forEach(b => {
+        if (!b.parentNode) return;
+        let x = parseFloat(b.style.left);
+        let y = parseFloat(b.style.top);
+        x += b.dx;
+        y += b.dy;
+        if (x <= 0 || x >= window.innerWidth - 80) b.dx = -b.dx;
+        if (y <= 0 || y >= window.innerHeight - 80) b.dy = -b.dy;
+        b.style.left = x + 'px';
+        b.style.top = y + 'px';
+      });
+      requestAnimationFrame(animateBubbles);
+    }
+    animateBubbles();
 
     function showTask(i) {
       const msg = document.createElement('div');
@@ -131,8 +155,9 @@
     }
 
     function triggerFirework() {
-      for (let i = 0; i < 12; i++) {
-        setTimeout(() => createSpark(window.innerWidth / 2 + (Math.random()*100-50), window.innerHeight / 2 + (Math.random()*100-50)), i * 100);
+      for (let i = 0; i < 20; i++) {
+        setTimeout(() => createSpark(window.innerWidth / 2 + (Math.random()*100 - 50),
+                                     window.innerHeight / 2 + (Math.random()*100 - 50)), i * 50);
       }
     }
   </script>
