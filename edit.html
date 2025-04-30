@@ -2,129 +2,97 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Редактор для Пузырьков by Nika Shum</title>
+  <title>Редактор пузырьков</title>
   <style>
     body {
-      font-family: 'Arial', sans-serif;
-      background-color: #f5f5f5;
+      font-family: sans-serif;
+      background: #f7faff;
       padding: 20px;
-      margin: 0;
-      box-sizing: border-box;
+      max-width: 600px;
+      margin: auto;
     }
-
-    h2 {
+    h1 {
       text-align: center;
-      color: #4CAF50;
     }
-
-    .task-inputs {
-      background-color: #fff;
-      border-radius: 8px;
-      padding: 20px;
-      margin: 20px 0;
-      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    label {
+      display: block;
+      margin: 10px 0 4px;
     }
-
-    .task-inputs h3 {
-      color: #333;
-    }
-
-    .task-inputs label {
-      font-size: 16px;
-      font-weight: bold;
-      color: #555;
-    }
-
-    .task-inputs input,
-    .task-inputs textarea {
+    input[type="text"] {
       width: 100%;
-      padding: 10px;
+      padding: 8px;
+      margin-bottom: 8px;
+    }
+    button {
+      padding: 10px 16px;
       margin: 10px 0;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      font-size: 14px;
-    }
-
-    .task-inputs button {
-      padding: 12px 24px;
-      background-color: #4CAF50;
-      color: white;
-      font-size: 16px;
+      background: #4facfe;
       border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-
-    .task-inputs button:hover {
-      background-color: #45a049;
-    }
-
-    .code-output {
-      background-color: #f8f8f8;
-      padding: 15px;
       border-radius: 8px;
-      font-family: monospace;
-      white-space: pre-wrap;
-      border: 1px solid #ddd;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #tasks-container input {
+      margin-bottom: 4px;
+    }
+    #output {
+      margin-top: 20px;
+      background: #eef;
+      padding: 10px;
+      word-break: break-all;
     }
   </style>
 </head>
 <body>
+  <h1>Редактор "Пузырьков"</h1>
 
-  <h2>Редактор для Пузырьков</h2>
+  <label>Изображение пузыря (URL)</label>
+  <input type="text" id="bubbleImg" placeholder="https://...">
 
-  <div class="task-inputs">
-    <h3>Задания для пузырьков (20 шт.)</h3>
-    <div id="task-list"></div>
+  <label>Фидбек после сундука</label>
+  <input type="text" id="finalText" placeholder="🎉 Well done!">
 
-    <label for="bubble-image">Изображение для Пузырьков (URL):</label>
-    <input id="bubble-image" type="text" placeholder="Вставьте ссылку на изображение для пузырьков">
+  <label>Задания</label>
+  <div id="tasks-container"></div>
+  <button onclick="addTask()">+ Добавить задание</button>
 
-    <label for="feedback-text">Текст фидбека:</label>
-    <textarea id="feedback-text" placeholder="Введите текст фидбека (например, 'Well Done!')"></textarea>
+  <button onclick="generateCode()">Скопировать iframe код</button>
 
-    <button id="save-button">Сгенерировать код для вставки</button>
-  </div>
-
-  <div class="code-output" id="iframe-code">
-    <!-- Здесь будет сгенерирован код iframe -->
-  </div>
+  <div id="output"></div>
 
   <script>
-    const saveButton = document.getElementById('save-button');
-    const bubbleImageInput = document.getElementById('bubble-image');
-    const feedbackTextInput = document.getElementById('feedback-text');
-    const iframeCodeOutput = document.getElementById('iframe-code');
-    const taskList = document.getElementById('task-list');
+    let taskCount = 0;
+    const maxTasks = 20;
 
-    // Генерация 20 полей для ввода заданий
-    for (let i = 1; i <= 20; i++) {
-      const taskDiv = document.createElement('div');
-      taskDiv.innerHTML = `
-        <label for="task${i}">Задание ${i}:</label>
-        <textarea id="task${i}" placeholder="Введите текст задания для пузырька ${i}"></textarea>
-      `;
-      taskList.appendChild(taskDiv);
+    function addTask(text = '') {
+      if (taskCount >= maxTasks) return;
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = `Задание ${taskCount + 1}`;
+      input.value = text;
+      document.getElementById('tasks-container').appendChild(input);
+      taskCount++;
     }
 
-    saveButton.addEventListener('click', () => {
-      const tasks = [];
-      for (let i = 1; i <= 20; i++) {
-        const taskValue = document.getElementById(`task${i}`).value;
-        tasks.push(taskValue);
-      }
+    // начальные 10 полей
+    for (let i = 0; i < 10; i++) addTask();
 
-      const bubbleImageValue = bubbleImageInput.value;
-      const feedbackTextValue = feedbackTextInput.value;
+    function generateCode() {
+      const img = encodeURIComponent(document.getElementById('bubbleImg').value);
+      const feedback = encodeURIComponent(document.getElementById('finalText').value);
+      const tasks = Array.from(document.querySelectorAll('#tasks-container input'))
+        .map(i => i.value.trim()).filter(v => v.length > 0);
 
-      const iframeCode = `
-<iframe src="https://nikashum93.github.io/pusyriki/?tasks=${encodeURIComponent(JSON.stringify(tasks))}&image=${encodeURIComponent(bubbleImageValue)}&feedback=${encodeURIComponent(feedbackTextValue)}&bubbles=${tasks.filter(task => task).length}" width="600" height="400" frameborder="0" allowfullscreen></iframe>
-      `;
-      iframeCodeOutput.textContent = iframeCode;
-      alert('Код сгенерирован! Копируйте его в Genially.');
-    });
+      const tasksParam = encodeURIComponent(tasks.join('|'));
+
+      const url = `https://nikashum93.github.io/pusyriki/index.html?tasks=${tasksParam}&img=${img}&feedback=${feedback}`;
+
+      const iframeCode = `<iframe style="width: 1280px; height: 720px; border: none;" src="${url}" scrolling="no" allowfullscreen></iframe>`;
+
+      document.getElementById('output').textContent = iframeCode;
+      navigator.clipboard.writeText(iframeCode).then(() => alert("Скопировано!"));
+    }
   </script>
-
 </body>
 </html>
