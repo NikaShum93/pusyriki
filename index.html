@@ -74,7 +74,6 @@
           showMessage(i);
           popped++;
           counter.innerHTML = `🫧 <strong>${popped} / ${total}</strong>`;
-          if (popped === total) showFinal();
         });
 
         root.appendChild(el);
@@ -107,7 +106,10 @@
           fontSize: '20px', fontFamily: 'sans-serif', textAlign: 'center',
           boxShadow: '0 6px 16px rgba(0,0,0,0.3)', cursor: 'pointer', zIndex: 200
         });
-        msg.onclick = () => msg.remove();
+        msg.onclick = () => {
+          msg.remove();
+          if (popped === total) showFinal();
+        };
         root.appendChild(msg);
       }
 
