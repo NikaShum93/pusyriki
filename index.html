@@ -5,87 +5,61 @@
   <title>Пузырьки by Nika Shum</title>
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      width: 100%;
-      height: 100%;
-      background: transparent;
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
+      background: transparent; overflow: hidden;
     }
-
     #bubble-container {
-      position: absolute;
-      inset: 0;
-      overflow: hidden;
+      position: absolute; inset: 0; overflow: hidden;
     }
-
     .bubble {
       position: absolute;
-      width: 80px;
-      height: 80px;
-      opacity: 0.8;
-      cursor: pointer;
-      border-radius: 50%;
+      width: 80px; height: 80px;
       background-image: url('https://media.tenor.com/mqvTrVZEMxIAAAAi/bubble-bfdi.gif');
       background-size: cover;
+      opacity: 0.8; cursor: pointer; border-radius: 50%;
     }
-
+    .spark {
+      position: absolute;
+      font-size: 28px;
+      animation: explode 0.6s ease-out forwards;
+      pointer-events: none;
+      z-index: 200;
+    }
+    @keyframes explode {
+      0% { opacity: 1; transform: scale(1) rotate(0deg); }
+      100% { opacity: 0; transform: scale(2.5) rotate(360deg); }
+    }
     #counter {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      font-family: sans-serif;
-      font-size: 18px;
-      color: #2d3436;
+      position: absolute; top: 20px; left: 20px;
+      font-family: sans-serif; font-size: 18px;
+      color: #2d3436; background: rgba(255,255,255,0.7);
+      padding: 5px 10px; border-radius: 12px;
       z-index: 10;
-      background: rgba(255, 255, 255, 0.7);
-      border-radius: 12px;
-      padding: 5px 10px;
     }
-
     #chest {
-      position: absolute;
-      width: 240px;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      cursor: pointer;
-      display: none;
-      z-index: 100;
+      position: absolute; width: 240px;
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+      cursor: pointer; display: none; z-index: 100;
     }
-
     #final-message {
-      position: absolute;
-      top: calc(50% - 190px);
-      left: 49.2%; /* подкорректировано для выравнивания над сундуком */
-      transform: translate(-50%, -50%);
-      font-size: 32px;
-      color: white;
+      position: absolute; display: none;
+      top: calc(50% - 190px); left: 50.5%; transform: translate(-50%, -50%);
+      font-size: 32px; color: white;
       background: linear-gradient(135deg, #f39c12, #f1c40f);
-      padding: 15px 25px;
-      border-radius: 16px;
+      padding: 15px 25px; border-radius: 16px;
       font-family: Comic Sans MS, sans-serif;
-      display: none;
-      z-index: 101;
-      text-align: center;
-      white-space: nowrap;
+      z-index: 101; white-space: nowrap;
     }
-
     .task-message {
       position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
       background: linear-gradient(135deg, #4facfe, #00f2fe);
-      color: white;
-      padding: 20px 30px;
-      border-radius: 20px;
-      font-size: 20px;
-      font-family: sans-serif;
-      text-align: center;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-      cursor: pointer;
-      z-index: 200;
+      color: white; padding: 20px 30px;
+      border-radius: 20px; font-size: 20px;
+      font-family: sans-serif; text-align: center;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+      cursor: pointer; z-index: 200;
     }
   </style>
 </head>
@@ -95,7 +69,6 @@
     <div id="final-message">🎉 Well Done! 🎉</div>
     <img id="chest" src="https://img.genially.com/64233afb55129a0017751c8e/915b9b98-7a24-4b3f-887a-28042ba9acca.png">
   </div>
-
   <script>
     const total = 10;
     let popped = 0;
@@ -103,7 +76,6 @@
     const counter = document.getElementById('counter');
     const finalMessage = document.getElementById('final-message');
     const chest = document.getElementById('chest');
-
     const TASKS = [
       "What's your name?", "How old are you?", "Where are you from?",
       "Have you got brothers or sisters?", "Have you got a pet?",
@@ -112,92 +84,57 @@
       "What's your favourite colour?"
     ];
 
-    function randomPos(max) {
-      return Math.random() * (max - 100) + 10;
+    function createSpark(x, y) {
+      const spark = document.createElement('div');
+      spark.className = 'spark';
+      spark.innerHTML = '✨';
+      spark.style.left = x + 'px';
+      spark.style.top = y + 'px';
+      bubbleContainer.appendChild(spark);
+      setTimeout(() => spark.remove(), 600);
     }
 
     for (let i = 0; i < total; i++) {
       const bubble = document.createElement('div');
-      bubble.classList.add('bubble');
-      bubble.style.left = randomPos(window.innerWidth - 80) + 'px';
-      bubble.style.top = randomPos(window.innerHeight - 80) + 'px';
-
-      bubble.onclick = () => {
+      bubble.className = 'bubble';
+      bubble.style.left = Math.random() * (window.innerWidth - 100) + 'px';
+      bubble.style.top = Math.random() * (window.innerHeight - 100) + 'px';
+      bubble.onclick = (e) => {
         new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/pop.mp3').play();
+        const rect = e.target.getBoundingClientRect();
+        createSpark(rect.left, rect.top);
         bubble.remove();
         popped++;
         counter.innerHTML = `🫧 <strong>${popped} / ${total}</strong>`;
         showTask(i);
-        if (popped === total) showFinal();
+        if (popped === total) showChest();
       };
-
       bubbleContainer.appendChild(bubble);
     }
 
     function showTask(i) {
       const msg = document.createElement('div');
-      msg.classList.add('task-message');
+      msg.className = 'task-message';
       msg.innerHTML = TASKS[i];
       msg.onclick = () => msg.remove();
       bubbleContainer.appendChild(msg);
     }
 
-    function showFinal() {
-      finalMessage.style.display = 'block';
+    function showChest() {
       chest.style.display = 'block';
       chest.onclick = () => {
         chest.src = 'https://img.genially.com/64233afb55129a0017751c8e/d76550fd-2622-441f-bbf2-faee6906772e.png';
         new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/open.mp3').play();
-        animateConfetti();
-      };
+        triggerFirework();
+        finalMessage.style.display = 'block';
+      }
     }
 
-    function animateBubbles() {
-      document.querySelectorAll('.bubble').forEach(bubble => {
-        let dx = (Math.random() - 0.5) * 0.5;
-        let dy = (Math.random() - 0.5) * 0.5;
-
-        function move() {
-          let rect = bubble.getBoundingClientRect();
-          let x = rect.left + dx;
-          let y = rect.top + dy;
-          if (x <= 0 || x >= window.innerWidth - 80) dx = -dx;
-          if (y <= 0 || y >= window.innerHeight - 80) dy = -dy;
-          bubble.style.left = x + 'px';
-          bubble.style.top = y + 'px';
-          requestAnimationFrame(move);
-        }
-        move();
-      });
+    function triggerFirework() {
+      for (let i = 0; i < 12; i++) {
+        setTimeout(() => createSpark(window.innerWidth / 2 + (Math.random()*100-50), window.innerHeight / 2 + (Math.random()*100-50)), i * 100);
+      }
     }
-
-    function animateConfetti() {
-      const sparkle = document.createElement('div');
-      sparkle.innerHTML = '✨✨✨';
-      Object.assign(sparkle.style, {
-        position: 'absolute',
-        top: '45%',
-        left: '50%',
-        transform: 'translate(-50%, -50%) scale(1.3)',
-        fontSize: '48px',
-        pointerEvents: 'none',
-        zIndex: 350,
-        animation: 'sparkle 1s ease-out forwards'
-      });
-      bubbleContainer.appendChild(sparkle);
-      setTimeout(() => sparkle.remove(), 1000);
-    }
-
-    const style = document.createElement('style');
-    style.innerHTML = `
-      @keyframes sparkle {
-        0% {opacity: 0; transform: scale(0.5);}
-        50% {opacity: 1; transform: scale(1.5);}
-        100% {opacity: 0; transform: scale(0.5);}
-      }`;
-    document.head.appendChild(style);
-
-    animateBubbles();
   </script>
 </body>
 </html>
