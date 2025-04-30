@@ -72,6 +72,7 @@
       z-index: 300;
       pointer-events: auto;
       transition: transform 0.3s ease;
+      display: none; /* Hidden until all bubbles are popped */
     }
   </style>
 </head>
@@ -198,6 +199,7 @@
       finalMessage.style.display = 'block'; // Показать финальное сообщение
 
       setTimeout(() => {
+        chest.style.display = 'block'; // Показываем сундук
         chest.style.transform = 'translate(-50%, -50%) scale(1.1)';
         chest.src = 'https://img.genially.com/64233afb55129a0017751c8e/d76550fd-2622-441f-bbf2-faee6906772e.png'; // Сундук открывается
       }, 600);
