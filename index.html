@@ -7,9 +7,8 @@
     body {
       font-family: 'Arial', sans-serif;
       background-color: transparent;
-      padding: 0;
       margin: 0;
-      box-sizing: border-box;
+      padding: 0;
     }
 
     .bubble-container {
@@ -23,25 +22,30 @@
       position: absolute;
       width: 80px;
       height: 80px;
-      opacity: 0.6;
+      opacity: 0.8;
       pointer-events: auto;
       cursor: pointer;
-      z-index: 100;
     }
 
     #counter {
       position: absolute;
       top: 20px;
       left: 20px;
-      background: linear-gradient(135deg, #f6f9fc, #dff9fb);
-      padding: 10px 16px;
-      border-radius: 12px;
       font-family: sans-serif;
       font-size: 18px;
       color: #2d3436;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      z-index: 300;
-      pointer-events: none;
+      z-index: 10;
+    }
+
+    #chest {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(1);
+      width: 240px;
+      cursor: pointer;
+      z-index: 100;
+      display: none;
     }
 
     #final-message {
@@ -52,27 +56,11 @@
       font-size: 36px;
       font-weight: bold;
       color: white;
-      background: linear-gradient(135deg, #f39c12, #f1c40f);
+      background: #4CAF50;
       padding: 20px 40px;
       border-radius: 16px;
       font-family: Comic Sans MS, sans-serif;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-      z-index: 400;
-      pointer-events: none;
       display: none;
-    }
-
-    #chest {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(1);
-      width: 240px;
-      cursor: pointer;
-      z-index: 300;
-      pointer-events: auto;
-      transition: transform 0.3s ease;
-      display: none; /* Initially hidden */
     }
   </style>
 </head>
@@ -85,7 +73,7 @@
   <img id="chest" src="https://img.genially.com/64233afb55129a0017751c8e/915b9b98-7a24-4b3f-887a-28042ba9acca.png" alt="Chest">
 
   <script>
-    const total = 10; // количество пузырьков
+    const total = 10;  // Пузыриков всего
     let popped = 0;
     const TASKS = {
       1: "What's your name?",
@@ -100,37 +88,20 @@
       10:"What's your favourite colour?"
     };
 
-    const bubbles = [];
-
     const counter = document.getElementById('counter');
     const finalMessage = document.getElementById('final-message');
     const chest = document.getElementById('chest');
 
-    // Двигаем пузырьки
-    const dx = 0.5;
-    const dy = 0.5;
+    const bubbles = [];
 
-    // Создаем пузырьки
     for (let i = 1; i <= total; i++) {
-      const el = document.createElement('img');
-      el.src = "https://media.tenor.com/mqvTrVZEMxIAAAAi/bubble-bfdi.gif"; // Пузырик по умолчанию
+      const el = document.createElement('div');
+      el.classList.add('bubble');
+      el.style.backgroundColor = 'blue';
       Object.assign(el.style, {
-        position: 'absolute',
-        width: '80px',
-        height: '80px',
-        opacity: '0.6',
-        pointerEvents: 'auto',
-        cursor: 'pointer',
-        zIndex: 100
+        top: `${Math.random() * window.innerHeight}px`,
+        left: `${Math.random() * window.innerWidth}px`
       });
-
-      const maxW = window.innerWidth - 80;
-      const maxH = window.innerHeight - 80;
-      el.style.left = Math.random() * maxW + 'px';
-      el.style.top  = Math.random() * maxH + 'px';
-
-      let xSpeed = (Math.random() - 0.5) * dx;
-      let ySpeed = (Math.random() - 0.5) * dy;
 
       el.addEventListener('click', () => {
         const popSound = new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/pop.mp3');
@@ -141,25 +112,9 @@
         counter.innerHTML = `🫧 <strong>${popped} / ${total}</strong>`;
       });
 
-      bubbleContainer.appendChild(el);
-
-      // Двигаем пузырьки
-      function moveBubble() {
-        let x = el.offsetLeft + xSpeed;
-        let y = el.offsetTop + ySpeed;
-
-        if (x < 0 || x > window.innerWidth - 80) xSpeed = -xSpeed + (Math.random() - 0.5) * dx;
-        if (y < 0 || y > window.innerHeight - 80) ySpeed = -ySpeed + (Math.random() - 0.5) * dy;
-
-        el.style.left = `${x}px`;
-        el.style.top = `${y}px`;
-
-        requestAnimationFrame(moveBubble);
-      }
-      moveBubble();
+      document.getElementById('bubble-container').appendChild(el);
     }
 
-    // Функция для отображения задания
     function showMessage(id) {
       const msg = document.createElement('div');
       msg.innerHTML = TASKS[id] || `<b>Задание ${id}</b>`;
@@ -188,52 +143,19 @@
         }
       });
 
-      bubbleContainer.appendChild(msg);
+      document.getElementById('bubble-container').appendChild(msg);
     }
 
-    // Функция для отображения финального фидбека
     function showFinal() {
+      finalMessage.style.display = 'block'; // Показать финальное сообщение
+      chest.style.display = 'block';  // Показываем сундук
+
       const openSound = new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/open.mp3');
       openSound.play().catch(() => {});
 
-      finalMessage.style.display = 'block'; // Показать финальное сообщение
-
-      setTimeout(() => {
-        chest.style.display = 'block'; // Показываем сундук
-        chest.style.transform = 'translate(-50%, -50%) scale(1.1)';
-        chest.src = 'https://img.genially.com/64233afb55129a0017751c8e/d76550fd-2622-441f-bbf2-faee6906772e.png'; // Сундук открывается
-      }, 600);
-
-      // Добавляем анимацию с блестками и конфетти
-      const sparkle = document.createElement('div');
-      sparkle.innerHTML = '✨✨✨';
-      Object.assign(sparkle.style, {
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%) scale(1.3)',
-        fontSize: '48px',
-        pointerEvents: 'none',
-        zIndex: 350,
-        animation: 'sparkle 1s ease-out forwards'
+      chest.addEventListener('click', () => {
+        alert('Congratulations!');
       });
-      bubbleContainer.appendChild(sparkle);
-      setTimeout(() => sparkle.remove(), 1000);
-
-      const coins = document.createElement('div');
-      coins.innerHTML = '🪙🪙🪙';
-      Object.assign(coins.style, {
-        position: 'absolute',
-        top: '60%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        fontSize: '32px',
-        pointerEvents: 'none',
-        zIndex: 350,
-        animation: 'drop 1.5s ease-out forwards'
-      });
-      bubbleContainer.appendChild(coins);
-      setTimeout(() => coins.remove(), 1500);
     }
   </script>
 
