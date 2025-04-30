@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Пузырики</title>
+  <title>Пузырики by Nika Shum</title>
   <style>
     html, body {
       margin: 0;
@@ -21,64 +21,123 @@
 </head>
 <body>
   <div id="bubble-extension"></div>
-
   <script>
     (function() {
       const root = document.getElementById('bubble-extension');
       const urlParams = new URLSearchParams(window.location.search);
-      const tasks = [];
-      let taskCount = 0;
 
-      for (let i = 1; i <= 50; i++) {
+      const tasks = [];
+      for (let i = 1; i <= 30; i++) {
         const val = urlParams.get(`task${i}`);
-        if (val) {
-          tasks.push(val);
-        }
+        if (val) tasks.push(val);
       }
 
-      taskCount = tasks.length;
+      const total = tasks.length;
+      const imgUrl = urlParams.get('img') || "https://media.tenor.com/mqvTrVZEMxIAAAAi/bubble-bfdi.gif";
+      const finalText = urlParams.get('final') || "🎉 Well Done!";
 
       const counter = document.createElement('div');
-      counter.innerHTML = `🫧 <strong>0 / ${taskCount}</strong>`;
+      counter.innerHTML = `🫧 <strong>0 / ${total}</strong>`;
       Object.assign(counter.style, {
-        position: 'absolute',
-        top: '20px',
-        left: '20px',
+        position: 'absolute', top: '20px', left: '20px',
         background: 'linear-gradient(135deg, #f6f9fc, #dff9fb)',
-        padding: '10px 16px',
-        borderRadius: '12px',
-        fontFamily: 'sans-serif',
-        fontSize: '18px',
-        color: '#2d3436',
+        padding: '10px 16px', borderRadius: '12px',
+        fontFamily: 'sans-serif', fontSize: '18px', color: '#2d3436',
         boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-        zIndex: 300,
-        pointerEvents: 'none'
+        zIndex: 300, pointerEvents: 'none'
       });
       root.appendChild(counter);
 
       let popped = 0;
-      let finalShown = false;
       const bubbles = [];
 
-      for (let i = 0; i < taskCount; i++) {
+      for (let i = 0; i < total; i++) {
         const el = document.createElement('img');
-        el.src = urlParams.get('bubbleImg') || "https://media.tenor.com/mqvTrVZEMxIAAAAi/bubble-bfdi.gif";
+        el.src = imgUrl;
         Object.assign(el.style, {
-          position: 'absolute',
-          width: '80px',
-          height: '80px',
-          opacity: '0.7',
-          pointerEvents: 'auto',
-          cursor: 'pointer',
-          zIndex: 100
+          position: 'absolute', width: '80px', height: '80px',
+          opacity: '0.7', pointerEvents: 'auto', cursor: 'pointer', zIndex: 100
         });
 
-        const maxW = window.innerWidth - 80;
-        const maxH = window.innerHeight - 80;
-        el.style.left = Math.random() * maxW + 'px';
-        el.style.top = Math.random() * maxH + 'px';
+        el.style.left = Math.random() * (window.innerWidth - 100) + 'px';
+        el.style.top = Math.random() * (window.innerHeight - 100) + 'px';
 
         const dx = (Math.random()*2 - 1) * 1.5;
         const dy = (Math.random()*2 - 1) * 1.5;
+
         const bubble = { el, dx, dy, id: i };
-        bubbles.push(b
+        bubbles.push(bubble);
+
+        el.addEventListener('click', () => {
+          new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/pop.mp3').play();
+          el.remove();
+          showMessage(i);
+          popped++;
+          counter.innerHTML = `🫧 <strong>${popped} / ${total}</strong>`;
+          if (popped === total) showFinal();
+        });
+
+        root.appendChild(el);
+      }
+
+      function animate() {
+        const W = window.innerWidth;
+        const H = window.innerHeight;
+        for (const b of bubbles) {
+          if (!b.el.parentNode) continue;
+          let x = b.el.offsetLeft + b.dx;
+          let y = b.el.offsetTop + b.dy;
+          if (x < 0 || x > W - 80) b.dx = -b.dx;
+          if (y < 0 || y > H - 80) b.dy = -b.dy;
+          b.el.style.left = x + 'px';
+          b.el.style.top = y + 'px';
+        }
+        requestAnimationFrame(animate);
+      }
+      animate();
+
+      function showMessage(i) {
+        const msg = document.createElement('div');
+        msg.innerHTML = tasks[i];
+        Object.assign(msg.style, {
+          position: 'absolute', top: '50%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background: 'linear-gradient(135deg, #4facfe, #00f2fe)',
+          color: 'white', padding: '20px 30px', borderRadius: '20px',
+          fontSize: '20px', fontFamily: 'sans-serif', textAlign: 'center',
+          boxShadow: '0 6px 16px rgba(0,0,0,0.3)', cursor: 'pointer', zIndex: 200
+        });
+        msg.onclick = () => msg.remove();
+        root.appendChild(msg);
+      }
+
+      function showFinal() {
+        const chest = document.createElement('img');
+        chest.src = 'https://img.genially.com/64233afb55129a0017751c8e/915b9b98-7a24-4b3f-887a-28042ba9acca.png';
+        Object.assign(chest.style, {
+          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+          width: '240px', cursor: 'pointer', zIndex: 300, pointerEvents: 'auto'
+        });
+        root.appendChild(chest);
+
+        chest.onclick = () => {
+          chest.src = 'https://img.genially.com/64233afb55129a0017751c8e/d76550fd-2622-441f-bbf2-faee6906772e.png';
+          new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/open.mp3').play();
+
+          const feedback = document.createElement('div');
+          feedback.textContent = finalText;
+          Object.assign(feedback.style, {
+            position: 'absolute', top: '35%', left: '49.4%', transform: 'translate(-50%, -50%)',
+            fontSize: '28px', fontWeight: 'bold', color: '#fff',
+            padding: '14px 28px', background: 'linear-gradient(135deg, #e67e22, #f1c40f)',
+            borderRadius: '16px', fontFamily: 'Comic Sans MS, sans-serif',
+            boxShadow: '0 8px 20px rgba(0,0,0,0.3)', zIndex: 400, pointerEvents: 'none',
+            textShadow: '2px 2px 6px rgba(0,0,0,0.4)'
+          });
+          root.appendChild(feedback);
+        };
+      }
+    })();
+  </script>
+</body>
+</html>
