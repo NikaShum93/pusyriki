@@ -82,8 +82,8 @@
     el.style.left = Math.random() * maxW + 'px';
     el.style.top  = Math.random() * maxH + 'px';
 
-    const dx = (Math.random()*2 - 1) * 1.5;
-    const dy = (Math.random()*2 - 1) * 1.5;
+    const dx = (Math.random()*2 - 1) * 0.5;
+    const dy = (Math.random()*2 - 1) * 0.5;
     const bubble = { el, dx, dy, id: i };
     bubbles.push(bubble);
 
@@ -91,10 +91,23 @@
       const popSound = new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/pop.mp3');
       popSound.play().catch(() => {});
       el.remove();
-      showParticles(el.offsetLeft + 40, el.offsetTop + 40);
       showMessage(i);
       popped++;
       counter.innerHTML = `🫧 <strong>${popped} / ${total}</strong>`;
+
+      const sparkle = document.createElement('div');
+      sparkle.innerHTML = '✨';
+      Object.assign(sparkle.style, {
+        position: 'absolute',
+        left: el.style.left,
+        top: el.style.top,
+        fontSize: '18px',
+        zIndex: 150,
+        pointerEvents: 'none',
+        animation: 'spark-pop 0.6s ease-out forwards'
+      });
+      root.appendChild(sparkle);
+      setTimeout(() => sparkle.remove(), 600);
     });
 
     root.appendChild(el);
@@ -115,8 +128,8 @@
       let x = b.el.offsetLeft + b.dx;
       let y = b.el.offsetTop  + b.dy;
 
-      if (x < 0 || x > W - 80) b.dx *= -1 + (Math.random() - 0.5) * 0.2;
-      if (y < 0 || y > H - 80) b.dy *= -1 + (Math.random() - 0.5) * 0.2;
+      if (x < 0 || x > W - 80) b.dx *= -1;
+      if (y < 0 || y > H - 80) b.dy *= -1;
 
       b.el.style.left = x + 'px';
       b.el.style.top  = y + 'px';
@@ -124,24 +137,6 @@
     requestAnimationFrame(animate);
   }
   animate();
-
-  function showParticles(x, y) {
-    for (let i = 0; i < 10; i++) {
-      const p = document.createElement('div');
-      p.textContent = '✨';
-      Object.assign(p.style, {
-        position: 'absolute',
-        left: `${x}px`,
-        top: `${y}px`,
-        fontSize: '16px',
-        zIndex: 999,
-        pointerEvents: 'none',
-        animation: 'bubblePop 0.6s ease-out forwards'
-      });
-      root.appendChild(p);
-      setTimeout(() => p.remove(), 600);
-    }
-  }
 
   function showMessage(id) {
     const msg = document.createElement('div');
@@ -239,13 +234,13 @@
 
   const style = document.createElement('style');
   style.textContent = `
+    @keyframes spark-pop {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(2); }
+    }
     @keyframes burst {
       0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
       100% { opacity: 0; transform: translate(calc(-50% + ${(Math.random()-0.5)*300}px), calc(-50% + ${(Math.random()-0.5)*300}px)) scale(0.5); }
-    }
-    @keyframes bubblePop {
-      0% { transform: scale(1); opacity: 1; }
-      100% { transform: scale(0.2) translateY(-30px); opacity: 0; }
     }
   `;
   document.head.appendChild(style);
