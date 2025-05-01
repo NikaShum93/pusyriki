@@ -31,6 +31,7 @@
   const urlParams = new URLSearchParams(window.location.search);
   const finalText = decodeURIComponent(urlParams.get('final') || '🎉 Well Done!');
   const bubbleImg = decodeURIComponent(urlParams.get('img') || 'https://media.tenor.com/mqvTrVZEMxIAAAAi/bubble-bfdi.gif');
+  const isCustomImg = bubbleImg !== 'https://media.tenor.com/mqvTrVZEMxIAAAAi/bubble-bfdi.gif';
 
   const TASKS = {};
   for (let [key, value] of urlParams.entries()) {
@@ -43,7 +44,6 @@
   const total = Object.keys(TASKS).length;
   let popped = 0;
   let finalUnlocked = false;
-
   const bubbles = [];
 
   const counter = document.createElement('div');
@@ -67,11 +67,11 @@
   for (let i = 1; i <= total; i++) {
     const el = document.createElement('img');
     el.src = bubbleImg;
+    el.style.opacity = isCustomImg ? '1' : '0.6';
     Object.assign(el.style, {
       position: 'absolute',
       width: '80px',
       height: '80px',
-      opacity: '0.6',
       pointerEvents: 'auto',
       cursor: 'pointer',
       zIndex: 100
@@ -82,9 +82,9 @@
     el.style.left = Math.random() * maxW + 'px';
     el.style.top  = Math.random() * maxH + 'px';
 
-    const dx = (Math.random()*2 - 1) * 0.9;
-    const dy = (Math.random()*2 - 1) * 0.9;
-    const bubble = { el, dx, dy, id: i };
+    const dx = (Math.random()*2 - 1) * 1;
+    const dy = (Math.random()*2 - 1) * 1;
+    const bubble = { el, dx, dy, id: i, stuckFrames: 0 };
     bubbles.push(bubble);
 
     el.addEventListener('click', () => {
@@ -104,12 +104,28 @@
     const H = root.clientHeight;
     for (const b of bubbles) {
       if (!b.el.parentNode) continue;
-      let x = b.el.offsetLeft + b.dx;
-      let y = b.el.offsetTop  + b.dy;
+      const prevX = b.el.offsetLeft;
+      const prevY = b.el.offsetTop;
+
+      let x = prevX + b.dx;
+      let y = prevY + b.dy;
+
       if (x < 0 || x > W - 80) b.dx = -b.dx + (Math.random() - 0.5)*0.1;
       if (y < 0 || y > H - 80) b.dy = -b.dy + (Math.random() - 0.5)*0.1;
+
       b.el.style.left = x + 'px';
       b.el.style.top  = y + 'px';
+
+      if (Math.abs(x - prevX) < 0.1 && Math.abs(y - prevY) < 0.1) {
+        b.stuckFrames++;
+        if (b.stuckFrames > 10) {
+          b.dx = (Math.random()*2 - 1) * 1;
+          b.dy = (Math.random()*2 - 1) * 1;
+          b.stuckFrames = 0;
+        }
+      } else {
+        b.stuckFrames = 0;
+      }
     }
     requestAnimationFrame(animate);
   }
@@ -165,16 +181,34 @@
     root.appendChild(chest);
 
     chest.addEventListener('click', () => {
+      const openSound = new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/open.mp3');
+      openSound.play().catch(() => {});
       chest.src = 'https://img.genially.com/64233afb55129a0017751c8e/d76550fd-2622-441f-bbf2-faee6906772e.png';
       chest.style.transform = 'translate(-50%, -50%) scale(1.1)';
+
+      for (let i = 0; i < 20; i++) {
+        const star = document.createElement('div');
+        star.innerHTML = Math.random() > 0.5 ? '🪙' : '💎';
+        star.style.position = 'absolute';
+        star.style.left = '50%';
+        star.style.top = '50%';
+        star.style.fontSize = '24px';
+        star.style.zIndex = 400;
+        star.style.pointerEvents = 'none';
+        star.style.animation = `burst 1.2s ease-out forwards`;
+        star.style.transform = `translate(-50%, -50%) rotate(${Math.random()*360}deg) scale(${0.8 + Math.random()*0.6})`;
+        root.appendChild(star);
+        setTimeout(() => star.remove(), 1200);
+      }
+
       const label = document.createElement('div');
       label.textContent = finalText;
       Object.assign(label.style, {
         position: 'absolute',
-        top: '30%',
+        top: '34%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        fontSize: '32px',
+        fontSize: '36px',
         fontWeight: 'bold',
         color: '#fff',
         padding: '20px 40px',
@@ -183,12 +217,22 @@
         fontFamily: 'Comic Sans MS, sans-serif',
         boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
         zIndex: 400,
-        pointerEvents: 'none'
+        pointerEvents: 'none',
+        textShadow: '2px 2px 6px rgba(0,0,0,0.4)'
       });
       root.appendChild(label);
       setTimeout(() => label.remove(), 2500);
     });
   }
+
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes burst {
+      0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(calc(-50% + ${(Math.random()-0.5)*300}px), calc(-50% + ${(Math.random()-0.5)*300}px)) scale(0.5); }
+    }
+  `;
+  document.head.appendChild(style);
 })();
   </script>
 </body>
