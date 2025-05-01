@@ -82,8 +82,8 @@
     el.style.left = Math.random() * maxW + 'px';
     el.style.top  = Math.random() * maxH + 'px';
 
-    const dx = (Math.random()*2 - 1) * 1.2;
-    const dy = (Math.random()*2 - 1) * 1.2;
+    const dx = (Math.random()*2 - 1) * 0.7;
+    const dy = (Math.random()*2 - 1) * 0.7;
     const bubble = { el, dx, dy, id: i };
     bubbles.push(bubble);
 
@@ -104,6 +104,15 @@
     const H = root.clientHeight;
     for (const b of bubbles) {
       if (!b.el.parentNode) continue;
+
+      // слегка меняем направление каждый кадр
+      b.dx += (Math.random() - 0.5) * 0.1;
+      b.dy += (Math.random() - 0.5) * 0.1;
+
+      // ограничим скорость
+      b.dx = Math.max(Math.min(b.dx, 1), -1);
+      b.dy = Math.max(Math.min(b.dy, 1), -1);
+
       let x = b.el.offsetLeft + b.dx;
       let y = b.el.offsetTop  + b.dy;
 
