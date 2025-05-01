@@ -82,10 +82,8 @@
     el.style.left = Math.random() * maxW + 'px';
     el.style.top  = Math.random() * maxH + 'px';
 
-    const angle = Math.random() * 2 * Math.PI;
-    const speed = 0.3 + Math.random() * 0.2; // Медленно и плавно
-    const dx = Math.cos(angle) * speed;
-    const dy = Math.sin(angle) * speed;
+    const dx = (Math.random()*2 - 1) * 1.2;
+    const dy = (Math.random()*2 - 1) * 1.2;
     const bubble = { el, dx, dy, id: i };
     bubbles.push(bubble);
 
@@ -109,9 +107,8 @@
       let x = b.el.offsetLeft + b.dx;
       let y = b.el.offsetTop  + b.dy;
 
-      // мягкий отскок от стен
-      if (x < 0 || x > W - 80) b.dx = -b.dx;
-      if (y < 0 || y > H - 80) b.dy = -b.dy;
+      if (x < 0 || x > W - 80) b.dx *= -1;
+      if (y < 0 || y > H - 80) b.dy *= -1;
 
       b.el.style.left = x + 'px';
       b.el.style.top  = y + 'px';
