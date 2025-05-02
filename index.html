@@ -82,9 +82,12 @@
     el.style.left = Math.random() * maxW + 'px';
     el.style.top  = Math.random() * maxH + 'px';
 
-    const dx = (Math.random()*2 - 1) * 0.5;
-    const dy = (Math.random()*2 - 1) * 0.5;
-    const bubble = { el, dx, dy, id: i };
+    const bubble = {
+      el,
+      angle: Math.random() * 2 * Math.PI,
+      speed: 0.3 + Math.random() * 0.2,
+      id: i
+    };
     bubbles.push(bubble);
 
     el.addEventListener('click', () => {
@@ -119,17 +122,13 @@
     for (const b of bubbles) {
       if (!b.el.parentNode) continue;
 
-      b.dx += (Math.random() - 0.5) * 0.05;
-      b.dy += (Math.random() - 0.5) * 0.05;
+      const speed = b.speed;
+      b.angle += (Math.random() - 0.5) * 0.05;
+      let x = b.el.offsetLeft + Math.cos(b.angle) * speed;
+      let y = b.el.offsetTop + Math.sin(b.angle) * speed;
 
-      b.dx = Math.max(Math.min(b.dx, 1.5), -1.5);
-      b.dy = Math.max(Math.min(b.dy, 1.5), -1.5);
-
-      let x = b.el.offsetLeft + b.dx;
-      let y = b.el.offsetTop  + b.dy;
-
-      if (x < 0 || x > W - 80) b.dx *= -1;
-      if (y < 0 || y > H - 80) b.dy *= -1;
+      if (x < 0 || x > W - 80) b.angle = Math.PI - b.angle;
+      if (y < 0 || y > H - 80) b.angle = -b.angle;
 
       b.el.style.left = x + 'px';
       b.el.style.top  = y + 'px';
@@ -240,7 +239,7 @@
     }
     @keyframes burst {
       0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-      100% { opacity: 0; transform: translate(calc(-50% + ${(Math.random()-0.5)*300}px), calc(-50% + ${(Math.random()-0.5)*300}px)) scale(0.5); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
     }
   `;
   document.head.appendChild(style);
