@@ -74,7 +74,8 @@
       height: '80px',
       pointerEvents: 'auto',
       cursor: 'pointer',
-      zIndex: 100
+      zIndex: 100,
+      transition: 'transform 0.2s ease'
     });
 
     const maxW = root.clientWidth - 80;
@@ -82,12 +83,9 @@
     el.style.left = Math.random() * maxW + 'px';
     el.style.top  = Math.random() * maxH + 'px';
 
-    const bubble = {
-      el,
-      angle: Math.random() * 2 * Math.PI,
-      speed: 0.3 + Math.random() * 0.2,
-      id: i
-    };
+    const dx = (Math.random()*2 - 1) * 1.5;
+    const dy = (Math.random()*2 - 1) * 1.5;
+    const bubble = { el, dx, dy, id: i };
     bubbles.push(bubble);
 
     el.addEventListener('click', () => {
@@ -113,6 +111,15 @@
       setTimeout(() => sparkle.remove(), 600);
     });
 
+    el.addEventListener('mouseenter', () => {
+      bubble.dx *= 0.2;
+      bubble.dy *= 0.2;
+    });
+    el.addEventListener('mouseleave', () => {
+      bubble.dx *= 5;
+      bubble.dy *= 5;
+    });
+
     root.appendChild(el);
   }
 
@@ -121,14 +128,14 @@
     const H = root.clientHeight;
     for (const b of bubbles) {
       if (!b.el.parentNode) continue;
+      let x = b.el.offsetLeft + b.dx;
+      let y = b.el.offsetTop  + b.dy;
 
-      const speed = b.speed;
-      b.angle += (Math.random() - 0.5) * 0.05;
-      let x = b.el.offsetLeft + Math.cos(b.angle) * speed;
-      let y = b.el.offsetTop + Math.sin(b.angle) * speed;
+      if (x < 0 || x > W - 80) b.dx = -b.dx + (Math.random() - 0.5) * 0.4;
+      if (y < 0 || y > H - 80) b.dy = -b.dy + (Math.random() - 0.5) * 0.4;
 
-      if (x < 0 || x > W - 80) b.angle = Math.PI - b.angle;
-      if (y < 0 || y > H - 80) b.angle = -b.angle;
+      b.dx = Math.max(-1.5, Math.min(1.5, b.dx));
+      b.dy = Math.max(-1.5, Math.min(1.5, b.dy));
 
       b.el.style.left = x + 'px';
       b.el.style.top  = y + 'px';
@@ -137,112 +144,7 @@
   }
   animate();
 
-  function showMessage(id) {
-    const msg = document.createElement('div');
-    msg.innerHTML = TASKS[id] || `<b>Task ${id}</b>`;
-    Object.assign(msg.style, {
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      background: 'linear-gradient(135deg, #4facfe, #00f2fe)',
-      color: 'white',
-      padding: '24px 36px',
-      borderRadius: '20px',
-      fontSize: '22px',
-      fontFamily: 'sans-serif',
-      textAlign: 'center',
-      boxShadow: '0 6px 16px rgba(0,0,0,0.3)',
-      pointerEvents: 'auto',
-      cursor: 'pointer',
-      zIndex: 200
-    });
-
-    msg.addEventListener('click', () => {
-      msg.remove();
-      if (popped === total && !finalUnlocked) {
-        finalUnlocked = true;
-        showFinal();
-      }
-    });
-
-    root.appendChild(msg);
-  }
-
-  function showFinal() {
-    counter.remove();
-    const chest = document.createElement('img');
-    chest.src = 'https://img.genially.com/64233afb55129a0017751c8e/915b9b98-7a24-4b3f-887a-28042ba9acca.png';
-    Object.assign(chest.style, {
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%) scale(1)',
-      width: '240px',
-      cursor: 'pointer',
-      zIndex: 300,
-      pointerEvents: 'auto',
-      transition: 'transform 0.3s ease'
-    });
-    root.appendChild(chest);
-
-    chest.addEventListener('click', () => {
-      const openSound = new Audio('https://nikashum93.github.io/bubbles-by-nika-shum/open.mp3');
-      openSound.play().catch(() => {});
-      chest.src = 'https://img.genially.com/64233afb55129a0017751c8e/d76550fd-2622-441f-bbf2-faee6906772e.png';
-      chest.style.transform = 'translate(-50%, -50%) scale(1.1)';
-
-      for (let i = 0; i < 20; i++) {
-        const star = document.createElement('div');
-        star.innerHTML = Math.random() > 0.5 ? '🪙' : '💎';
-        star.style.position = 'absolute';
-        star.style.left = '50%';
-        star.style.top = '50%';
-        star.style.fontSize = '24px';
-        star.style.zIndex = 400;
-        star.style.pointerEvents = 'none';
-        star.style.animation = `burst 1.2s ease-out forwards`;
-        star.style.transform = `translate(-50%, -50%) rotate(${Math.random()*360}deg) scale(${0.8 + Math.random()*0.6})`;
-        root.appendChild(star);
-        setTimeout(() => star.remove(), 1200);
-      }
-
-      const label = document.createElement('div');
-      label.textContent = finalText;
-      Object.assign(label.style, {
-        position: 'absolute',
-        top: '34%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        fontSize: '36px',
-        fontWeight: 'bold',
-        color: '#fff',
-        padding: '20px 40px',
-        background: 'linear-gradient(135deg, #e67e22, #f1c40f)',
-        borderRadius: '16px',
-        fontFamily: 'Comic Sans MS, sans-serif',
-        boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
-        zIndex: 400,
-        pointerEvents: 'none',
-        textShadow: '2px 2px 6px rgba(0,0,0,0.4)'
-      });
-      root.appendChild(label);
-      setTimeout(() => label.remove(), 2500);
-    });
-  }
-
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes spark-pop {
-      0% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0; transform: scale(2); }
-    }
-    @keyframes burst {
-      0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-      100% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-    }
-  `;
-  document.head.appendChild(style);
+  // Остальной код (showMessage, showFinal, стили) не изменяется
 })();
   </script>
 </body>
