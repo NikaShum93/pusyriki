@@ -25,6 +25,11 @@
       50% { opacity: 1; transform: scale(1.2); }
       100% { opacity: 0; transform: scale(0.5); }
     }
+    @keyframes confetti {
+      0% { opacity: 0; transform: scale(0.7) rotate(-10deg); }
+      50% { opacity: 1; transform: scale(1.2) rotate(15deg); }
+      100% { opacity: 0; transform: scale(0.7) rotate(-10deg); }
+    }
   </style>
 </head>
 <body>
@@ -139,6 +144,9 @@
       if (x < 0 || x > W - 80) b.dx = -b.dx + (Math.random() - 0.5) * 0.4;
       if (y < 0 || y > H - 80) b.dy = -b.dy + (Math.random() - 0.5) * 0.4;
 
+      if (Math.abs(b.dx) < 0.3) b.dx += (Math.random() - 0.5) * 0.5;
+      if (Math.abs(b.dy) < 0.3) b.dy += (Math.random() - 0.5) * 0.5;
+
       b.dx = Math.max(-1.5, Math.min(1.5, b.dx));
       b.dy = Math.max(-1.5, Math.min(1.5, b.dy));
 
@@ -209,13 +217,13 @@
       label.textContent = finalText;
       Object.assign(label.style, {
         position: 'absolute',
-        top: '30%',
+        top: '38%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        fontSize: '36px',
+        fontSize: '32px',
         fontWeight: 'bold',
         color: '#fff',
-        padding: '20px 40px',
+        padding: '16px 30px',
         background: 'linear-gradient(135deg, #e67e22, #f1c40f)',
         borderRadius: '16px',
         fontFamily: 'Comic Sans MS, sans-serif',
@@ -225,7 +233,21 @@
         textShadow: '2px 2px 6px rgba(0,0,0,0.4)'
       });
       root.appendChild(label);
-      setTimeout(() => label.remove(), 2500);
+
+      const confetti = document.createElement('div');
+      confetti.textContent = '🎊🎊🎊';
+      Object.assign(confetti.style, {
+        position: 'absolute',
+        top: '42%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        fontSize: '40px',
+        zIndex: 350,
+        animation: 'confetti 1.2s ease-out forwards',
+        pointerEvents: 'none'
+      });
+      root.appendChild(confetti);
+      setTimeout(() => confetti.remove(), 1200);
     });
   }
 })();
