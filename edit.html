@@ -14,15 +14,18 @@
       margin: auto;
       color: #fff;
     }
+
     .logo {
       display: flex;
       justify-content: center;
       margin-bottom: 16px;
     }
+
     .logo img {
       width: 80px;
       animation: glow 3s infinite ease-in-out;
     }
+
     @keyframes glow {
       0% { filter: drop-shadow(0 0 0px #0ff); }
       50% { filter: drop-shadow(0 0 12px #ff00cc); }
@@ -44,7 +47,8 @@
       color: #f0f0f0;
     }
 
-    input[type="text"] {
+    input[type="text"],
+    textarea {
       width: 100%;
       padding: 10px;
       margin-bottom: 6px;
@@ -53,6 +57,7 @@
       border-radius: 6px;
       color: #0ff;
       box-shadow: 0 0 6px #0ff inset;
+      font-family: monospace;
     }
 
     button {
@@ -69,10 +74,6 @@
       box-shadow: 0 0 10px #ff00cc;
     }
 
-    #tasks-container input {
-      margin-bottom: 4px;
-    }
-
     #output {
       margin-top: 20px;
       background: #111;
@@ -81,6 +82,8 @@
       border: 1px solid #0ff;
       border-radius: 8px;
       box-shadow: 0 0 6px #0ff inset;
+      min-height: 80px;
+      white-space: pre-wrap;
     }
 
     small {
@@ -104,9 +107,8 @@
   <label>Финальный фидбек</label>
   <input type="text" id="finalText" placeholder="🎉 Well done!">
 
-  <label>Задания</label>
-  <div id="tasks-container"></div>
-  <button onclick="addTask()">+ Добавить задание</button>
+  <label>Задания (по одному в строке)</label>
+  <textarea id="tasksInput" rows="10" placeholder="Например:&#10;Say a sentence with 'because'&#10;What did you do yesterday?"></textarea>
 
   <button onclick="generateCode()">🔮 Скопировать код для Genially</button>
 
@@ -114,34 +116,33 @@
   <small>© Корпорация Геймификации Будущего</small>
 
   <script>
-    let taskCount = 0;
-    const maxTasks = 20;
-
-    function addTask(text = '') {
-      if (taskCount >= maxTasks) return;
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.placeholder = `Задание ${taskCount + 1}`;
-      input.value = text;
-      document.getElementById('tasks-container').appendChild(input);
-      taskCount++;
-    }
-
-    for (let i = 0; i < 10; i++) addTask();
-
     function generateCode() {
       const img = encodeURIComponent(document.getElementById('bubbleImg').value);
       const feedback = encodeURIComponent(document.getElementById('finalText').value);
-      const tasks = Array.from(document.querySelectorAll('#tasks-container input'))
-        .map(i => i.value.trim()).filter(v => v.length > 0);
 
-      const taskParams = tasks.map((task, index) => `task${index+1}=${encodeURIComponent(task)}`).join('&');
+      const rawTasks = document.getElementById('tasksInput').value;
+      const tasks = rawTasks.split('\n').map(t => t.trim()).filter(t => t.length > 0);
+
+      if (tasks.length === 0) {
+        alert("Добавь хотя бы одно задание!");
+        return;
+      }
+
+      const taskParams = tasks.map((task, index) => `task${index + 1}=${encodeURIComponent(task)}`).join('&');
       const url = `https://nikashum93.github.io/pusyriki/index.html?${taskParams}&img=${img}&final=${feedback}`;
 
       const iframeCode = `<iframe style="width: 1280px; height: 720px; border: none;" src="${url}" scrolling="no" allowfullscreen></iframe>`;
 
-      document.getElementById('output').textContent = iframeCode;
-      navigator.clipboard.writeText(iframeCode).then(() => alert("Скопировано в буфер обмена!"));
+      const output = document.getElementById('output');
+      output.textContent = iframeCode;
+
+      // Попытка скопировать
+      navigator.clipboard.writeText(iframeCode)
+        .then(() => alert("Скопировано в буфер обмена!"))
+        .catch(() => {
+          alert("Не удалось скопировать автоматически. Скопируй вручную.");
+          window.getSelection().selectAllChildren(output);
+        });
     }
   </script>
 </body>
