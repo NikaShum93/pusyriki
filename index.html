@@ -138,14 +138,29 @@
     const H = root.clientHeight;
     for (const b of bubbles) {
       if (!b.el.parentNode) continue;
+
       let x = b.el.offsetLeft + b.dx;
-      let y = b.el.offsetTop  + b.dy;
+      let y = b.el.offsetTop + b.dy;
 
-      if (x < 0 || x > W - 80) b.dx = -b.dx + (Math.random() - 0.5) * 0.4;
-      if (y < 0 || y > H - 80) b.dy = -b.dy + (Math.random() - 0.5) * 0.4;
+      if (x < 0) {
+        x = 0;
+        b.dx = Math.abs(b.dx) + (Math.random() * 0.2);
+      }
+      if (x > W - 80) {
+        x = W - 80;
+        b.dx = -Math.abs(b.dx) - (Math.random() * 0.2);
+      }
+      if (y < 0) {
+        y = 0;
+        b.dy = Math.abs(b.dy) + (Math.random() * 0.2);
+      }
+      if (y > H - 80) {
+        y = H - 80;
+        b.dy = -Math.abs(b.dy) - (Math.random() * 0.2);
+      }
 
-      if (Math.abs(b.dx) < 0.3) b.dx += (Math.random() - 0.5) * 0.5;
-      if (Math.abs(b.dy) < 0.3) b.dy += (Math.random() - 0.5) * 0.5;
+      b.dx += (Math.random() - 0.5) * 0.2;
+      b.dy += (Math.random() - 0.5) * 0.2;
 
       b.dx = Math.max(-1.5, Math.min(1.5, b.dx));
       b.dy = Math.max(-1.5, Math.min(1.5, b.dy));
