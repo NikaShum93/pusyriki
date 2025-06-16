@@ -20,16 +20,6 @@
       overflow: hidden;
       z-index: 1;
     }
-    @keyframes sparkle {
-      0% { opacity: 0; transform: scale(0.5); }
-      50% { opacity: 1; transform: scale(1.2); }
-      100% { opacity: 0; transform: scale(0.5); }
-    }
-    @keyframes confetti {
-      0% { opacity: 0; transform: scale(0.7) rotate(-10deg); }
-      50% { opacity: 1; transform: scale(1.2) rotate(15deg); }
-      100% { opacity: 0; transform: scale(0.7) rotate(-10deg); }
-    }
   </style>
 </head>
 <body>
@@ -115,9 +105,14 @@
         fontSize: '18px',
         zIndex: 150,
         pointerEvents: 'none',
-        animation: 'sparkle 0.6s ease-out forwards'
+        opacity: 1,
+        transition: 'opacity 0.6s ease-out, transform 0.6s ease-out'
       });
       root.appendChild(sparkle);
+      requestAnimationFrame(() => {
+        sparkle.style.opacity = '0';
+        sparkle.style.transform = 'scale(1.6)';
+      });
       setTimeout(() => sparkle.remove(), 600);
     });
 
@@ -142,31 +137,21 @@
       let x = b.el.offsetLeft + b.dx;
       let y = b.el.offsetTop + b.dy;
 
-      if (x < 0) {
-        x = 0;
-        b.dx = Math.abs(b.dx) + (Math.random() * 0.2);
+      if (x <= 0 || x >= W - 80) {
+        b.dx = -b.dx + (Math.random() - 0.5) * 0.2;
       }
-      if (x > W - 80) {
-        x = W - 80;
-        b.dx = -Math.abs(b.dx) - (Math.random() * 0.2);
-      }
-      if (y < 0) {
-        y = 0;
-        b.dy = Math.abs(b.dy) + (Math.random() * 0.2);
-      }
-      if (y > H - 80) {
-        y = H - 80;
-        b.dy = -Math.abs(b.dy) - (Math.random() * 0.2);
+      if (y <= 0 || y >= H - 80) {
+        b.dy = -b.dy + (Math.random() - 0.5) * 0.2;
       }
 
-      b.dx += (Math.random() - 0.5) * 0.2;
-      b.dy += (Math.random() - 0.5) * 0.2;
+      b.dx += (Math.random() - 0.5) * 0.05;
+      b.dy += (Math.random() - 0.5) * 0.05;
 
       b.dx = Math.max(-1.5, Math.min(1.5, b.dx));
       b.dy = Math.max(-1.5, Math.min(1.5, b.dy));
 
-      b.el.style.left = x + 'px';
-      b.el.style.top  = y + 'px';
+      b.el.style.left = (b.el.offsetLeft + b.dx) + 'px';
+      b.el.style.top  = (b.el.offsetTop + b.dy) + 'px';
     }
     requestAnimationFrame(animate);
   }
@@ -202,6 +187,37 @@
     });
 
     root.appendChild(msg);
+  }
+
+  function launchSparkles() {
+    for (let i = 0; i < 20; i++) {
+      const sparkle = document.createElement('div');
+      sparkle.textContent = '✨';
+      Object.assign(sparkle.style, {
+        position: 'absolute',
+        left: '50%',
+        top: '50%',
+        transform: 'translate(-50%, -50%)',
+        fontSize: `${12 + Math.random() * 10}px`,
+        opacity: '1',
+        pointerEvents: 'none',
+        zIndex: 350,
+        transition: 'transform 1s ease-out, opacity 1s ease-out'
+      });
+
+      const angle = Math.random() * 2 * Math.PI;
+      const distance = 40 + Math.random() * 40;
+      const dx = Math.cos(angle) * distance;
+      const dy = Math.sin(angle) * distance;
+
+      requestAnimationFrame(() => {
+        sparkle.style.transform = `translate(${dx}px, ${dy}px)`;
+        sparkle.style.opacity = '0';
+      });
+
+      root.appendChild(sparkle);
+      setTimeout(() => sparkle.remove(), 1000);
+    }
   }
 
   function showFinal() {
@@ -249,20 +265,7 @@
       });
       root.appendChild(label);
 
-      const confetti = document.createElement('div');
-      confetti.textContent = '🎊✨💎🪙';
-      Object.assign(confetti.style, {
-        position: 'absolute',
-        top: '42%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        fontSize: '32px',
-        zIndex: 350,
-        animation: 'confetti 1.2s ease-out forwards',
-        pointerEvents: 'none'
-      });
-      root.appendChild(confetti);
-      setTimeout(() => confetti.remove(), 1200);
+      launchSparkles();
     });
   }
 })();
